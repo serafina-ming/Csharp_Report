@@ -71,9 +71,15 @@ namespace CsharpReport
         public Form1()
         {
             InitializeComponent();
+
+            //登入時顯示登入視窗
+            loginForm loginForm;
+            loginForm = new loginForm();
+            loginForm.ShowDialog();
+
+            //讀取資料庫
             Load_DB();
             Show_DB();
-
         }
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
@@ -84,6 +90,14 @@ namespace CsharpReport
         private void button2_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void 登出ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            loginForm loginForm;
+            loginForm = new loginForm();
+
+            loginForm.ShowDialog();
         }
     }
 }
