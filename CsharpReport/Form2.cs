@@ -30,9 +30,13 @@ namespace CsharpReport
         {
             DBConfig.sqlite_connect = new SQLiteConnection(DBConfig.dbPath);
             DBConfig.sqlite_connect.Open();// Open
-
         }
-
+        /// <summary>
+        /// 查詢是否存在該帳號，若存在則回傳使用者帳號名稱
+        /// </summary>
+        /// <param name="_account"></param>
+        /// <param name="_password"></param>
+        /// <returns></returns>
         private string Show_DB(string _account,string _password)
         {
             var command = DBConfig.sqlite_connect.CreateCommand();
@@ -53,16 +57,25 @@ namespace CsharpReport
             return name;
         }
 
+        //判斷有沒有登入成功
+        string login = "N";
+        /// <summary>
+        /// 登入按鈕
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button1_Click(object sender, EventArgs e)
         {
-            Load_DB();
+            //判斷欄位有沒有輸入完全
             if (textBox1.Text != "" && textBox2.Text != "")
             {
                 Load_DB();
-                string result = Show_DB(textBox1.Text, textBox2.Text);
-                if (result != "")
+                string name = Show_DB(textBox1.Text, textBox2.Text);
+                //如果有回傳的使用者名稱，就可以登入
+                if (name != "")
                 {
-                    MessageBox.Show("歡迎"+ result + "登入");
+                    MessageBox.Show("歡迎"+ name + "登入");
+                    login = "Y";
                     this.Close();
                 }
                 else
@@ -80,14 +93,28 @@ namespace CsharpReport
         {
 
         }
-
         private void Form2_FormClosed(object sender, FormClosedEventArgs e)
         {
-            System.Environment.Exit(0);
+            //關閉此視窗則關閉系統
+            //login變數判斷有沒有登入
+            if (login == "N") 
+            { 
+                System.Environment.Exit(0);
+            }
+            
         }
 
+        /// <summary>
+        /// 密碼欄按下enter可以傳送登入驗證結果
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void textBox2_KeyPress(object sender, KeyPressEventArgs e)
         {
+            if (e.KeyChar == (char)13)
+            {
+                button1_Click(sender, e);
+            }
 
         }
     }
