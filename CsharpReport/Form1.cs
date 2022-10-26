@@ -71,6 +71,11 @@ namespace CsharpReport
         public Form1()
         {
             InitializeComponent();
+
+            Form2 form2;
+            form2 = new Form2();
+            form2.ShowDialog();
+
             Load_DB();
             Show_DB();
 
@@ -84,6 +89,14 @@ namespace CsharpReport
         private void button2_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void 登出ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Form2 form2;
+            form2 = new Form2();
+            // 打開Form 2，會鎖定Form 1
+            form2.ShowDialog();
         }
     }
 }
