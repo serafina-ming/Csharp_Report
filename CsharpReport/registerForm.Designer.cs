@@ -45,9 +45,10 @@
             this.button1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(143, 62);
-            this.button1.TabIndex = 16;
+            this.button1.TabIndex = 3;
             this.button1.Text = "註冊";
             this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // textBox2
             // 
@@ -55,9 +56,8 @@
             this.textBox2.Location = new System.Drawing.Point(275, 162);
             this.textBox2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textBox2.Name = "textBox2";
-            this.textBox2.PasswordChar = '*';
             this.textBox2.Size = new System.Drawing.Size(187, 43);
-            this.textBox2.TabIndex = 15;
+            this.textBox2.TabIndex = 1;
             // 
             // textBox1
             // 
@@ -66,7 +66,7 @@
             this.textBox1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(187, 43);
-            this.textBox1.TabIndex = 14;
+            this.textBox1.TabIndex = 0;
             // 
             // label2
             // 
@@ -96,7 +96,8 @@
             this.textBox3.Name = "textBox3";
             this.textBox3.PasswordChar = '*';
             this.textBox3.Size = new System.Drawing.Size(187, 43);
-            this.textBox3.TabIndex = 18;
+            this.textBox3.TabIndex = 2;
+            this.textBox3.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox3_KeyPress);
             // 
             // label3
             // 

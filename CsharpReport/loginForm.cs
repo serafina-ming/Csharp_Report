@@ -21,7 +21,13 @@ namespace CsharpReport
 
         }
 
-        private string Check_User(string _account, string _password)
+        /// <summary>
+        /// 驗證使用者
+        /// </summary>
+        /// <param name="account">帳號</param>
+        /// <param name="password">密碼</param>
+        /// <returns>使用者姓名</returns>
+        private string Check_User(string account, string password)
         {
             var command = DBConfig.sqlite_connect.CreateCommand();
             command.CommandText = @"SELECT member_name
@@ -29,8 +35,8 @@ namespace CsharpReport
                             WHERE account = @account AND password = @password";
             var name = "";
 
-            command.Parameters.AddWithValue("@account", _account);
-            command.Parameters.AddWithValue("@password", _password);
+            command.Parameters.AddWithValue("@account", account);
+            command.Parameters.AddWithValue("@password", password);
             using (var result = command.ExecuteReader())
             {
                 while (result.Read())
@@ -47,6 +53,7 @@ namespace CsharpReport
             InitializeComponent();
         }
 
+        //紀錄是否登入
         bool loginCheck = false;
         private void button1_Click(object sender, EventArgs e)
         {
@@ -73,7 +80,9 @@ namespace CsharpReport
 
         private void button2_Click(object sender, EventArgs e)
         {
-
+            registerForm registerForm;
+            registerForm = new registerForm();
+            registerForm.ShowDialog();
         }
 
         /// <summary>

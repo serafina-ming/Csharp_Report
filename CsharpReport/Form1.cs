@@ -92,11 +92,15 @@ namespace CsharpReport
 
         }
 
+        /// <summary>
+        /// 登出後，顯示登入視窗
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void 登出ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             loginForm loginForm;
             loginForm = new loginForm();
-
             loginForm.ShowDialog();
         }
     }
