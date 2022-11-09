@@ -33,19 +33,47 @@ namespace CsharpReport
 
         }
 
-        private void Show_DB()
+        private void GetBookData()
         {
             this.dataGridView1.Rows.Clear();
 
+            var command = DBConfig.sqlite_connect.CreateCommand();
             string sql = @"SELECT book_id, book_name, writer, publish,
                             category_name, status, member_name
                             FROM book_data
                             LEFT JOIN category_data
-                            ON category=category_id
+                            ON category = category_id
                             LEFT JOIN member
-                            ON book_keeper=member_id;";
-            DBConfig.sqlite_cmd = new SQLiteCommand(sql, DBConfig.sqlite_connect);
-            DBConfig.sqlite_datareader = DBConfig.sqlite_cmd.ExecuteReader();
+                            ON book_keeper = member_id
+                            WHERE book_name LIKE @book_name
+                            AND writer LIKE @writer
+                            AND publish LIKE @publish ";
+            string status = "";
+
+            if (comboBox1.SelectedIndex > 0)
+            {
+                sql += "AND category = @category ";
+            }
+            if((checkBox1.Checked || checkBox2.Checked) && !(checkBox1.Checked && checkBox2.Checked))
+            {
+                sql += "AND status = @status ";
+                if(checkBox1.Checked)
+                {
+                    status = checkBox1.Text;
+                }
+                else
+                {
+                    status = checkBox2.Text;
+                }
+            }
+            
+            command.CommandText = sql;
+            command.Parameters.AddWithValue("@book_name", "%"+textBox1.Text+"%");
+            command.Parameters.AddWithValue("@writer", "%"+textBox2.Text+"%");
+            command.Parameters.AddWithValue("@publish", "%"+textBox3.Text+"%");
+            command.Parameters.AddWithValue("@category", comboBox1.SelectedIndex);
+            command.Parameters.AddWithValue("@status", status);
+            DBConfig.sqlite_datareader = command.ExecuteReader();
 
             if (DBConfig.sqlite_datareader.HasRows)
             {
@@ -79,7 +107,7 @@ namespace CsharpReport
 
             //讀取資料庫
             Load_DB();
-            Show_DB();
+            GetBookData();
         }
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
@@ -89,7 +117,7 @@ namespace CsharpReport
 
         private void button2_Click(object sender, EventArgs e)
         {
-
+            GetBookData();
         }
 
         /// <summary>
@@ -103,5 +131,11 @@ namespace CsharpReport
             loginForm = new loginForm();
             loginForm.ShowDialog();
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
+        }
+
     }
 }

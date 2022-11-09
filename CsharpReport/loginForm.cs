@@ -71,6 +71,8 @@ namespace CsharpReport
                 {
                     MessageBox.Show("登入失敗");
                 }
+                textBox1.Text = "";
+                textBox2.Text = "";
             }
             else
             {
