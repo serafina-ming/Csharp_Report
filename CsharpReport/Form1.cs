@@ -137,5 +137,34 @@ namespace CsharpReport
 
         }
 
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (dataGridView1.Columns[e.ColumnIndex] is DataGridViewButtonColumn && e.RowIndex > -1)
+            {
+
+                //獲取當前被點擊的單元格
+                DataGridViewButtonCell vCell = (DataGridViewButtonCell)dataGridView1.CurrentCell;
+
+                //現在第幾欄
+                //MessageBox.Show(e.ColumnIndex.ToString());
+                //目前第幾筆
+                //MessageBox.Show(e.RowIndex.ToString());
+                //MessageBox.Show(dataGridView1.Columns[e.ColumnIndex].ToString());
+                if (dataGridView1.Rows[e.RowIndex].Cells["Column1"].Value != null)
+                {
+                    //點下去顯示書籍編號
+                    MessageBox.Show(dataGridView1.Rows[e.RowIndex].Cells["Column1"].Value.ToString());
+                }
+                else
+                {
+                    MessageBox.Show("查無此書");
+                }
+
+                //參考
+                //https://www.twblogs.net/a/5e5578e8bd9eee2117c61e72
+                //https://learn.microsoft.com/zh-tw/dotnet/api/system.windows.forms.datagridviewbuttoncolumn?view=windowsdesktop-7.0
+            }
+        }
+
     }
 }
