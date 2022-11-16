@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static CsharpReport.Form1;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace CsharpReport
 {
@@ -48,6 +49,11 @@ namespace CsharpReport
             }
         }
 
+        /// <summary>
+        /// 更新按鈕
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button1_Click(object sender, EventArgs e)
         {
             
@@ -63,17 +69,19 @@ namespace CsharpReport
             command.Parameters.AddWithValue("@publish", textBox3.Text);
             command.Parameters.AddWithValue("@category", comboBox1.SelectedIndex + 1);
             command.Parameters.AddWithValue("@status", radioButton1.Text);
-            command.Parameters.AddWithValue("@book_keeper", textBox4.Text);
 
+            //判斷借閱狀態，有切換到且以借出有借閱人才可以執行更新動作
             var status = false;
             if (radioButton1.Checked == true)
             {
                 command.Parameters.AddWithValue("@status", radioButton1.Text);
+                command.Parameters.AddWithValue("@book_keeper", "");
                 status = true;
             }
             else if (textBox4.Text != "")
             {
                 command.Parameters.AddWithValue("@status", radioButton2.Text);
+                command.Parameters.AddWithValue("@book_keeper", textBox4.Text);
                 status = true;
             }
             else
@@ -93,6 +101,21 @@ namespace CsharpReport
                     MessageBox.Show("系統出現沒辦法解決的錯誤，請放棄並離開");
                 }
             }
+        }
+
+        /// <summary>
+        /// 可借出按鈕偵測
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void radioButton1_CheckedChanged(object sender, EventArgs e)
+        {
+            //如果切換到可借出就將借閱人內容清空
+            if (radioButton1.Checked == true)
+            {
+                textBox4.Text = "";
+            }
+            
         }
     }
 }
