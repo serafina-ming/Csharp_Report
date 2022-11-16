@@ -197,12 +197,13 @@
             this.comboBox1.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.comboBox1.Items.AddRange(new object[] {
             "全部",
-            "1",
-            "2",
-            "3",
-            "4",
-            "5",
-            "6"});
+            "文學",
+            "飲食料理",
+            "心理勵志",
+            "漫畫",
+            "輕小說",
+            "電腦資訊",
+            "藝術設計"});
             this.comboBox1.Location = new System.Drawing.Point(192, 262);
             this.comboBox1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.comboBox1.Name = "comboBox1";
@@ -352,7 +353,7 @@
             this.tabPage2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabPage2.Size = new System.Drawing.Size(891, 308);
+            this.tabPage2.Size = new System.Drawing.Size(623, 308);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "統計資料";
             this.tabPage2.UseVisualStyleBackColor = true;

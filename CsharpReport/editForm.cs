@@ -25,7 +25,7 @@ namespace CsharpReport
                 textBox1.Text = value[1].ToString();
                 textBox2.Text = value[2].ToString();
                 textBox3.Text = value[3].ToString();
-                comboBox1.SelectedIndex = (int)value[4];
+                comboBox1.SelectedIndex = (int)value[4]-1;
                 textBox4.Text = value[6].ToString();
 
                 if (value[5].ToString() == "可借出")

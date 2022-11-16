@@ -134,7 +134,9 @@ namespace CsharpReport
 
         private void button1_Click(object sender, EventArgs e)
         {
-
+            addForm addForm;
+            addForm = new addForm();
+            addForm.ShowDialog();
         }
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
