@@ -30,11 +30,11 @@ namespace CsharpReport
 
                 if (value[5].ToString() == "可借出")
                 {
-                    checkBox1.Checked = true;
+                    radioButton1.Checked = true;
                 }
                 else
                 {
-                    checkBox2.Checked = true;
+                    radioButton2.Checked = true;
                 }
             }
         }
