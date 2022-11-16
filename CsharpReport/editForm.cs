@@ -52,7 +52,7 @@ namespace CsharpReport
                     string member_id = Convert.ToString(DBConfig.sqlite_datareader["member_id"]);
                     string member_name = Convert.ToString(DBConfig.sqlite_datareader["member_name"]);
 
-                    comboBox1.Items.Add(new ComboBoxItem(member_id, member_name));
+                    comboBox2.Items.Add(new ComboBoxItem(member_id, member_name));
                 }
                 //DBConfig.sqlite_datareader.Close();
             }
@@ -95,6 +95,8 @@ namespace CsharpReport
             }
 
         }
+        //參考
+        //https://blog.hungwin.com.tw/csharp-winform-combobox-value-text/
 
         /// <summary>
         /// 設定目前的書籍資料
@@ -108,7 +110,7 @@ namespace CsharpReport
                 textBox2.Text = value[2].ToString();
                 textBox3.Text = value[3].ToString();
                 comboBox1.SelectedIndex = (int)value[4]-1;
-                textBox4.Text = value[6].ToString();
+                //comboBox2.SelectedIndex = (int)value[7];
 
                 if (value[5].ToString() == "可借出")
                 {
@@ -129,7 +131,7 @@ namespace CsharpReport
         private void button1_Click(object sender, EventArgs e)
         {
             //取得下拉式選單的值
-            //ComboUtil.GetItem(comboBox1).Value
+            //ComboUtil.GetItem(comboBox).Value
 
             var command = DBConfig.sqlite_connect.CreateCommand();
             command.CommandText = @"UPDATE book_data
@@ -143,7 +145,7 @@ namespace CsharpReport
             command.Parameters.AddWithValue("@publish", textBox3.Text);
             command.Parameters.AddWithValue("@category", comboBox1.SelectedIndex + 1);
             command.Parameters.AddWithValue("@status", radioButton1.Text);
-
+            
             //判斷借閱狀態，有切換到且以借出有借閱人才可以執行更新動作
             var status = false;
             if (radioButton1.Checked == true)
@@ -152,16 +154,17 @@ namespace CsharpReport
                 command.Parameters.AddWithValue("@book_keeper", "");
                 status = true;
             }
-            else if (textBox4.Text != "")
+            else if (comboBox2.SelectedIndex > -1)
             {
                 command.Parameters.AddWithValue("@status", radioButton2.Text);
-                command.Parameters.AddWithValue("@book_keeper", textBox4.Text);
+                command.Parameters.AddWithValue("@book_keeper", ComboUtil.GetItem(comboBox2).Value);
                 status = true;
             }
             else
             {
                 MessageBox.Show("請填寫借閱人");
             }
+            
             if (status == true)
             {
                 try
@@ -187,10 +190,8 @@ namespace CsharpReport
             //如果切換到可借出就將借閱人內容清空
             if (radioButton1.Checked == true)
             {
-                textBox4.Text = "";
+                comboBox2.SelectedIndex=-1;
             }
-            
         }
-
     }
 }
