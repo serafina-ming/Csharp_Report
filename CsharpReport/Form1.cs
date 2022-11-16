@@ -137,6 +137,7 @@ namespace CsharpReport
             addForm addForm;
             addForm = new addForm();
             addForm.ShowDialog();
+            GetBookData();
         }
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -190,6 +191,36 @@ namespace CsharpReport
                             editForm.ShowDialog();
                         }
                         DBConfig.sqlite_datareader.Close();
+                        GetBookData();
+                    }
+                }
+                else if (e.ColumnIndex == 8 && dataGridView1.Rows[e.RowIndex].Cells["Column1"].Value != null)
+                {
+                    int bookId = (int)dataGridView1.Rows[e.RowIndex].Cells["Column1"].Value;
+                    string bookName = (string)dataGridView1.Rows[e.RowIndex].Cells["Column2"].Value;
+                    var confirmResult = MessageBox.Show("確定刪除《" + bookName + "》？",
+                                     "刪除書籍！！",
+                                     MessageBoxButtons.YesNo);
+                    if (confirmResult == DialogResult.Yes)
+                    {
+                        var command = DBConfig.sqlite_connect.CreateCommand();
+                        string sql = @"DELETE FROM book_data WHERE book_id = @book_id";
+                        command.CommandText = sql;
+                        command.Parameters.AddWithValue("@book_id", bookId);
+                        try
+                        {
+                            command.ExecuteNonQuery();
+                            MessageBox.Show("刪除成功");
+                            GetBookData();
+                        }
+                        catch (SQLiteException ex)
+                        {
+                            MessageBox.Show("系統錯誤");
+                        }
+                    }
+                    else
+                    {
+                        // If 'No', do something here.
                     }
                 }
                 else
