@@ -111,7 +111,7 @@
       <DependentUpon>registerForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="book.db">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

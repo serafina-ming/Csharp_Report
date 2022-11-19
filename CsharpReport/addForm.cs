@@ -27,7 +27,11 @@ namespace CsharpReport
                 if (AddBook(textBox1.Text, textBox2.Text, textBox3.Text, comboBox1.SelectedIndex))
                 {
                     MessageBox.Show("新增成功");
-                    this.Close();
+                    textBox1.Text = "";
+                    textBox2.Text = "";
+                    textBox3.Text = "";
+                    comboBox1.SelectedIndex = -1;
+                    //this.Close();
                 }
                 else
                 {

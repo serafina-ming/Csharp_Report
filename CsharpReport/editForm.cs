@@ -19,6 +19,7 @@ namespace CsharpReport
         public editForm()
         {
             InitializeComponent();
+            GetMemberData();
         }
 
         /// <summary>
@@ -33,18 +34,87 @@ namespace CsharpReport
                 textBox2.Text = value[2].ToString();
                 textBox3.Text = value[3].ToString();
                 comboBox1.SelectedIndex = (int)value[4]-1;
-                textBox4.Text = value[6].ToString();
+                comboBox2.SelectedIndex = (int)value[6]-1;
 
                 if (value[5].ToString() == "可借出")
                 {
                     radioButton1.Checked = true;
+                    comboBox2.Enabled = false;
                 }
                 else
                 {
                     radioButton2.Checked = true;
+                    textBox2.Enabled = true;
                 }
             }
         }
+
+        /// <summary>
+        /// 下拉式選單的內容
+        /// </summary>
+        private void GetMemberData()
+        {
+
+            var command = DBConfig.sqlite_connect.CreateCommand();
+            string sql = @"SELECT member_id, member_name
+                            FROM member";
+
+            command.CommandText = sql;
+            DBConfig.sqlite_datareader = command.ExecuteReader();
+
+            if (DBConfig.sqlite_datareader.HasRows)
+            {
+                while (DBConfig.sqlite_datareader.Read()) //read every data
+                {
+                    string member_id = Convert.ToString(DBConfig.sqlite_datareader["member_id"]);
+                    string member_name = Convert.ToString(DBConfig.sqlite_datareader["member_name"]);
+
+                    comboBox2.Items.Add(new ComboBoxItem(member_id, member_id+" "+member_name));
+                }
+            }
+        }
+
+        /// <summary>
+        /// 設定下拉式選單的Value與Text
+        /// </summary>
+        public class ComboBoxItem
+        {
+            public string Value { get; set; }
+            public string Text { get; set; }
+            public ComboBoxItem(string value, string text)
+            {
+                Value = value;
+                Text = text;
+            }
+            public override string ToString()
+            {
+                return Text;
+            }
+        }
+
+        /// <summary>
+        /// 取得下拉式選單的Value
+        /// </summary>
+        public class ComboUtil
+        {
+            /// <summary>
+            /// 取得下拉項目的值
+            /// </summary>
+            /// <param name="cbo">物件</param>
+            /// <returns></returns>
+            public static ComboBoxItem GetItem(ComboBox cbo)
+            {
+                ComboBoxItem item = new ComboBoxItem("", "");
+                if (cbo.SelectedIndex > -1)
+                {
+                    item = cbo.Items[cbo.SelectedIndex] as ComboBoxItem;
+                }
+                return item;
+            }
+
+        }
+        //參考
+        //https://blog.hungwin.com.tw/csharp-winform-combobox-value-text/
 
         /// <summary>
         /// 更新按鈕
@@ -74,10 +144,10 @@ namespace CsharpReport
                 command.Parameters.AddWithValue("@book_keeper", "");
                 status = true;
             }
-            else if (textBox4.Text != "")
+            else if (comboBox2.SelectedIndex > -1)
             {
                 command.Parameters.AddWithValue("@status", radioButton2.Text);
-                command.Parameters.AddWithValue("@book_keeper", textBox4.Text);
+                command.Parameters.AddWithValue("@book_keeper", ComboUtil.GetItem(comboBox2).Value);
                 status = true;
             }
             else
@@ -119,10 +189,20 @@ namespace CsharpReport
             //如果切換到可借出就將借閱人內容清空
             if (radioButton1.Checked == true)
             {
-                textBox4.Text = "";
+                comboBox2.SelectedIndex = -1;
+                comboBox2.Enabled = false;
+            }
+            else if(radioButton2.Checked == true)
+            {
+                comboBox2.Enabled = true;
             }
         }
 
+        /// <summary>
+        /// 刪除按鈕
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button2_Click(object sender, EventArgs e)
         {
             var bookId = label7.Text;

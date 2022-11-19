@@ -191,7 +191,7 @@ namespace CsharpReport
                     int bookId = (int)dataGridView1.Rows[e.RowIndex].Cells["Column1"].Value;
                     var command = DBConfig.sqlite_connect.CreateCommand();
                     string sql = @"SELECT book_id, book_name, writer, publish,
-                            category_id, status, member_name
+                            category_id, status, member_id
                             FROM book_data
                             LEFT JOIN category_data
                             ON category = category_id
@@ -213,9 +213,13 @@ namespace CsharpReport
                             string _publish = Convert.ToString(DBConfig.sqlite_datareader["publish"]);
                             int _categoryId = Convert.ToInt32(DBConfig.sqlite_datareader["category_id"]);
                             string _status = Convert.ToString(DBConfig.sqlite_datareader["status"]);
-                            string _memberName = Convert.ToString(DBConfig.sqlite_datareader["member_name"]);
+                            int _memberId = 0;
+                            if (Convert.ToString(DBConfig.sqlite_datareader["member_id"])!="")
+                            {
+                                _memberId = Convert.ToInt32(DBConfig.sqlite_datareader["member_id"]);
+                            }
 
-                            var a = new Object[] { _bookId, _bookName, _writer, _publish, _categoryId, _status, _memberName };
+                            var a = new Object[] { _bookId, _bookName, _writer, _publish, _categoryId, _status, _memberId };
                             editForm editForm;
                             editForm = new editForm();
                             editForm.setValue = a;
