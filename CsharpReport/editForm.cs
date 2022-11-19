@@ -104,7 +104,7 @@ namespace CsharpReport
                 catch (SqlException ex)
                 {
                     //MessageBox.Show(ex.Message);
-                    MessageBox.Show("系統出現沒辦法解決的錯誤，請放棄並離開");
+                    MessageBox.Show("系統錯誤");
                 }
             }
         }
@@ -120,6 +120,35 @@ namespace CsharpReport
             if (radioButton1.Checked == true)
             {
                 textBox4.Text = "";
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            var bookId = label7.Text;
+            var confirmResult = MessageBox.Show("確定刪除此書？",
+                                     "刪除書籍！！",
+                                     MessageBoxButtons.YesNo);
+            if (confirmResult == DialogResult.Yes)
+            {
+                var command = DBConfig.sqlite_connect.CreateCommand();
+                string sql = @"DELETE FROM book_data WHERE book_id = @book_id";
+                command.CommandText = sql;
+                command.Parameters.AddWithValue("@book_id", bookId);
+                try
+                {
+                    command.ExecuteNonQuery();
+                    MessageBox.Show("刪除成功");
+                    this.Close();
+                }
+                catch (SQLiteException ex)
+                {
+                    MessageBox.Show("系統錯誤");
+                }
+            }
+            else
+            {
+                // If 'No', do something here.
             }
         }
     }

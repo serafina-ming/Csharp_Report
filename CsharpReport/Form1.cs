@@ -15,6 +15,9 @@ namespace CsharpReport
     {
         int index = 1;
 
+        /// <summary>
+        /// 資料庫設定
+        /// </summary>
         public class DBConfig
         {
             public static string dbFile = Application.StartupPath + @"\book.db";
@@ -26,6 +29,9 @@ namespace CsharpReport
             public static SQLiteDataReader sqlite_datareader;
         }
 
+        /// <summary>
+        /// 連接資料庫
+        /// </summary>
         private void Load_DB()
         {
             DBConfig.sqlite_connect = new SQLiteConnection(DBConfig.dbPath);
@@ -33,6 +39,9 @@ namespace CsharpReport
 
         }
 
+        /// <summary>
+        /// 取得書籍資料並顯示於dataGrid
+        /// </summary>
         private void GetBookData()
         {
             this.dataGridView1.Rows.Clear();
@@ -107,14 +116,25 @@ namespace CsharpReport
 
             //讀取資料庫
             Load_DB();
+            //設定dataGrid資料
             GetBookData();
         }
 
+        /// <summary>
+        /// menuStrip說明按鈕
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MessageBox.Show("關於");
         }
 
+        /// <summary>
+        /// 查詢功能
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button2_Click(object sender, EventArgs e)
         {
             GetBookData();
@@ -132,14 +152,25 @@ namespace CsharpReport
             loginForm.ShowDialog();
         }
 
+        /// <summary>
+        /// 顯示新增資料視窗
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button1_Click(object sender, EventArgs e)
         {
             addForm addForm;
             addForm = new addForm();
             addForm.ShowDialog();
+            //新增後，重新載入dataGrid資料
             GetBookData();
         }
 
+        /// <summary>
+        /// 設定dataGrid編輯刪除按鈕功能
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (dataGridView1.Columns[e.ColumnIndex] is DataGridViewButtonColumn && e.RowIndex > -1)
@@ -191,6 +222,7 @@ namespace CsharpReport
                             editForm.ShowDialog();
                         }
                         DBConfig.sqlite_datareader.Close();
+                        //更新後，重新載入dataGrid資料
                         GetBookData();
                     }
                 }
@@ -211,6 +243,7 @@ namespace CsharpReport
                         {
                             command.ExecuteNonQuery();
                             MessageBox.Show("刪除成功");
+                            //刪除後，重新載入dataGrid資料
                             GetBookData();
                         }
                         catch (SQLiteException ex)
@@ -233,6 +266,5 @@ namespace CsharpReport
                 //https://learn.microsoft.com/zh-tw/dotnet/api/system.windows.forms.datagridviewbuttoncolumn?view=windowsdesktop-7.0
             }
         }
-
     }
 }
