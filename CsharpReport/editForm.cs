@@ -16,6 +16,13 @@ namespace CsharpReport
 {
     public partial class editForm : Form
     {
+        int _bookId = 0;
+        string _bookName = "";
+        string _writer = "";
+        string _publish = "";
+        int _categoryId = 0;
+        string _status = "";
+        int _memberId = 0;
         public editForm()
         {
             InitializeComponent();
@@ -30,22 +37,58 @@ namespace CsharpReport
             set
             {
                 label7.Text = value[0].ToString();
-                textBox1.Text = value[1].ToString();
-                textBox2.Text = value[2].ToString();
-                textBox3.Text = value[3].ToString();
-                comboBox1.SelectedIndex = (int)value[4]-1;
-                comboBox2.SelectedIndex = (int)value[6]-1;
+            }
+        }
 
-                if (value[5].ToString() == "可借出")
+        public void GetThisBookData()
+        {
+            var command = DBConfig.sqlite_connect.CreateCommand();
+            string sql = @"SELECT book_id, book_name, writer, publish,
+                            category_id, status, member_id
+                            FROM book_data
+                            LEFT JOIN category_data
+                            ON category = category_id
+                            LEFT JOIN member
+                            ON book_keeper = member_id
+                            WHERE book_id = @book_id";
+
+            command.CommandText = sql;
+            command.Parameters.AddWithValue("@book_id", label7.Text);
+            DBConfig.sqlite_datareader = command.ExecuteReader();
+
+            if (DBConfig.sqlite_datareader.HasRows)
+            {
+                while (DBConfig.sqlite_datareader.Read()) //read every data
                 {
-                    radioButton1.Checked = true;
-                    comboBox2.Enabled = false;
+                    _bookId = Convert.ToInt32(DBConfig.sqlite_datareader["book_id"]);
+                    _bookName = Convert.ToString(DBConfig.sqlite_datareader["book_name"]);
+                    _writer = Convert.ToString(DBConfig.sqlite_datareader["writer"]);
+                    _publish = Convert.ToString(DBConfig.sqlite_datareader["publish"]);
+                    _categoryId = Convert.ToInt32(DBConfig.sqlite_datareader["category_id"]);
+                    _status = Convert.ToString(DBConfig.sqlite_datareader["status"]);
+                    _memberId = 0;
+                    if (Convert.ToString(DBConfig.sqlite_datareader["member_id"]) != "")
+                    {
+                        _memberId = Convert.ToInt32(DBConfig.sqlite_datareader["member_id"]);
+                    }
+                    textBox1.Text = _bookName;
+                    textBox2.Text = _writer;
+                    textBox3.Text = _publish;
+                    comboBox1.SelectedIndex = _categoryId - 1;
+                    comboBox2.SelectedIndex = _memberId - 1;
+
+                    if (_status == "可借出")
+                    {
+                        radioButton1.Checked = true;
+                        comboBox2.Enabled = false;
+                    }
+                    else
+                    {
+                        radioButton2.Checked = true;
+                        textBox2.Enabled = true;
+                    }
                 }
-                else
-                {
-                    radioButton2.Checked = true;
-                    textBox2.Enabled = true;
-                }
+                DBConfig.sqlite_datareader.Close();
             }
         }
 
@@ -72,6 +115,7 @@ namespace CsharpReport
                     comboBox2.Items.Add(new ComboBoxItem(member_id, member_id+" "+member_name));
                 }
             }
+            DBConfig.sqlite_datareader.Close();
         }
 
         /// <summary>
@@ -168,7 +212,7 @@ namespace CsharpReport
                     }
                     else
                     {
-                        // If 'No', do something here.
+                        GetThisBookData();
                     }
                 }
                 catch (SqlException ex)
@@ -206,30 +250,34 @@ namespace CsharpReport
         private void button2_Click(object sender, EventArgs e)
         {
             var bookId = label7.Text;
-            var confirmResult = MessageBox.Show("確定刪除此書？",
-                                     "刪除書籍！！",
-                                     MessageBoxButtons.YesNo);
-            if (confirmResult == DialogResult.Yes)
+            if (_status == "可借出")
             {
-                var command = DBConfig.sqlite_connect.CreateCommand();
-                string sql = @"DELETE FROM book_data WHERE book_id = @book_id";
-                command.CommandText = sql;
-                command.Parameters.AddWithValue("@book_id", bookId);
-                try
+                var confirmResult = MessageBox.Show("確定刪除此書？",
+                                            "刪除書籍！！",
+                                            MessageBoxButtons.YesNo);
+                if (confirmResult == DialogResult.Yes)
                 {
-                    command.ExecuteNonQuery();
-                    MessageBox.Show("刪除成功");
-                    this.Close();
-                }
-                catch (SQLiteException ex)
-                {
-                    MessageBox.Show("系統錯誤");
+                    var command = DBConfig.sqlite_connect.CreateCommand();
+                    string sql = @"DELETE FROM book_data WHERE book_id = @book_id";
+                    command.CommandText = sql;
+                    command.Parameters.AddWithValue("@book_id", bookId);
+                    try
+                    {
+                        command.ExecuteNonQuery();
+                        MessageBox.Show("刪除成功");
+                        this.Close();
+                    }
+                    catch (SQLiteException ex)
+                    {
+                        MessageBox.Show("系統錯誤");
+                    }
                 }
             }
             else
             {
-                // If 'No', do something here.
+                MessageBox.Show("外借中不可刪除");
             }
+            
         }
     }
 }

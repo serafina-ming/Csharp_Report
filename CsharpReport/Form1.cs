@@ -189,75 +189,50 @@ namespace CsharpReport
                     //點下去顯示書籍編號
                     //MessageBox.Show(dataGridView1.Rows[e.RowIndex].Cells["Column1"].Value.ToString());
                     int bookId = (int)dataGridView1.Rows[e.RowIndex].Cells["Column1"].Value;
-                    var command = DBConfig.sqlite_connect.CreateCommand();
-                    string sql = @"SELECT book_id, book_name, writer, publish,
-                            category_id, status, member_id
-                            FROM book_data
-                            LEFT JOIN category_data
-                            ON category = category_id
-                            LEFT JOIN member
-                            ON book_keeper = member_id
-                            WHERE book_id = @book_id";
-
-                    command.CommandText = sql;
-                    command.Parameters.AddWithValue("@book_id", bookId);
-                    DBConfig.sqlite_datareader = command.ExecuteReader();
-
-                    if (DBConfig.sqlite_datareader.HasRows)
-                    {
-                        while (DBConfig.sqlite_datareader.Read()) //read every data
-                        {
-                            int _bookId = Convert.ToInt32(DBConfig.sqlite_datareader["book_id"]);
-                            string _bookName = Convert.ToString(DBConfig.sqlite_datareader["book_name"]);
-                            string _writer = Convert.ToString(DBConfig.sqlite_datareader["writer"]);
-                            string _publish = Convert.ToString(DBConfig.sqlite_datareader["publish"]);
-                            int _categoryId = Convert.ToInt32(DBConfig.sqlite_datareader["category_id"]);
-                            string _status = Convert.ToString(DBConfig.sqlite_datareader["status"]);
-                            int _memberId = 0;
-                            if (Convert.ToString(DBConfig.sqlite_datareader["member_id"])!="")
-                            {
-                                _memberId = Convert.ToInt32(DBConfig.sqlite_datareader["member_id"]);
-                            }
-
-                            var a = new Object[] { _bookId, _bookName, _writer, _publish, _categoryId, _status, _memberId };
-                            editForm editForm;
-                            editForm = new editForm();
-                            editForm.setValue = a;
-                            editForm.ShowDialog();
-                        }
-                        DBConfig.sqlite_datareader.Close();
-                        //更新後，重新載入dataGrid資料
-                        GetBookData();
-                    }
+                    var a = new Object[] { bookId };
+                    editForm editForm;
+                    editForm = new editForm();
+                    editForm.setValue = a;
+                    editForm.GetThisBookData();
+                    editForm.ShowDialog();
+                    GetBookData();
                 }
                 else if (e.ColumnIndex == 8 && dataGridView1.Rows[e.RowIndex].Cells["Column1"].Value != null)
                 {
                     int bookId = (int)dataGridView1.Rows[e.RowIndex].Cells["Column1"].Value;
                     string bookName = (string)dataGridView1.Rows[e.RowIndex].Cells["Column2"].Value;
-                    var confirmResult = MessageBox.Show("確定刪除《" + bookName + "》？",
+                    if (dataGridView1.Rows[e.RowIndex].Cells["Column6"].Value.ToString() == "可借出") 
+                    {
+                        var confirmResult = MessageBox.Show("確定刪除《" + bookName + "》？",
                                      "刪除書籍！！",
                                      MessageBoxButtons.YesNo);
-                    if (confirmResult == DialogResult.Yes)
-                    {
-                        var command = DBConfig.sqlite_connect.CreateCommand();
-                        string sql = @"DELETE FROM book_data WHERE book_id = @book_id";
-                        command.CommandText = sql;
-                        command.Parameters.AddWithValue("@book_id", bookId);
-                        try
+
+                        if (confirmResult == DialogResult.Yes)
                         {
-                            command.ExecuteNonQuery();
-                            MessageBox.Show("刪除成功");
-                            //刪除後，重新載入dataGrid資料
-                            GetBookData();
+                            var command = DBConfig.sqlite_connect.CreateCommand();
+                            string sql = @"DELETE FROM book_data WHERE book_id = @book_id";
+                            command.CommandText = sql;
+                            command.Parameters.AddWithValue("@book_id", bookId);
+                            try
+                            {
+                                command.ExecuteNonQuery();
+                                MessageBox.Show("刪除成功");
+                                //刪除後，重新載入dataGrid資料
+                                GetBookData();
+                            }
+                            catch (SQLiteException ex)
+                            {
+                                MessageBox.Show("系統錯誤");
+                            }
                         }
-                        catch (SQLiteException ex)
+                        else
                         {
-                            MessageBox.Show("系統錯誤");
+                            // If 'No', do something here.
                         }
                     }
                     else
                     {
-                        // If 'No', do something here.
+                        MessageBox.Show("外借中不可刪除");
                     }
                 }
                 else
