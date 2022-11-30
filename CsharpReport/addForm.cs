@@ -51,7 +51,7 @@ namespace CsharpReport
 
         }
 
-        private bool AddBook(string book_name, string writer, string publish, int category)
+        public bool AddBook(string book_name, string writer, string publish, int category)
         {
             var command = DBConfig.sqlite_connect.CreateCommand();
             command.CommandText = @"INSERT INTO book_data (book_name, writer, publish, category, status)
