@@ -245,5 +245,12 @@ namespace CsharpReport
                 //https://learn.microsoft.com/zh-tw/dotnet/api/system.windows.forms.datagridviewbuttoncolumn?view=windowsdesktop-7.0
             }
         }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            exportOrImportForm exportOrImportForm;
+            exportOrImportForm = new exportOrImportForm();
+            exportOrImportForm.ShowDialog();
+        }
     }
 }
