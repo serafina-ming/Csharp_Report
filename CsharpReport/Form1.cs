@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Data.SQLite;
+using System.Net;
 
 namespace CsharpReport
 {
@@ -248,8 +249,34 @@ namespace CsharpReport
 
         private void button3_Click(object sender, EventArgs e)
         {
+            List<bookData> result = new List<bookData>();
+            for (int i = 0; i < dataGridView1.Rows.Count; i++)
+            {
+                result.Add(new bookData()
+                {
+                    bookId = Convert.ToString(dataGridView1.Rows[i].Cells[0].Value),
+                    bookName = Convert.ToString(dataGridView1.Rows[i].Cells[1].Value),
+                    writer = Convert.ToString(dataGridView1.Rows[i].Cells[2].Value),
+                    publish = Convert.ToString(dataGridView1.Rows[i].Cells[3].Value),
+                    categoryName = Convert.ToString(dataGridView1.Rows[i].Cells[4].Value),
+                    status = Convert.ToString(dataGridView1.Rows[i].Cells[5].Value),
+                    memberName = Convert.ToString(dataGridView1.Rows[i].Cells[6].Value)
+                });
+            }
+
+            var dataSend = new Object[] { "export", result };
             exportOrImportForm exportOrImportForm;
             exportOrImportForm = new exportOrImportForm();
+            exportOrImportForm.setValue = dataSend;
+            exportOrImportForm.ShowDialog();
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            var dataSend = new Object[] { "import" };
+            exportOrImportForm exportOrImportForm;
+            exportOrImportForm = new exportOrImportForm();
+            exportOrImportForm.setValue = dataSend;
             exportOrImportForm.ShowDialog();
         }
     }

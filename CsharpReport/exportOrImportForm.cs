@@ -23,14 +23,10 @@ namespace CsharpReport
     public partial class exportOrImportForm : Form
     {
         string mode = "export";
-        object[][] dataGridView1 = { new object[] { "a", "1", "a", "1", "a", "1", "2" }, new object[] { "c", "b", "s", "5", "r", "g", "b" } };
+        List<bookData> dataGridViewdata;
         public exportOrImportForm()
         {
             InitializeComponent();
-            if (mode == "import")
-            {
-                button2.Visible = false;
-            }
         }
 
         /// <summary>
@@ -40,9 +36,17 @@ namespace CsharpReport
         {
             set
             {
-                label1.Text = "請選擇匯入資料格式：";
-                button1.Text = "匯入書籍資料";
-                mode = "import";
+                mode = value[0].ToString();
+                if (value[0].ToString() == "export")
+                {
+                    dataGridViewdata = (List<bookData>)value[1];
+                }
+                else
+                {
+                    label1.Text = "請選擇匯入資料格式：";
+                    button1.Text = "匯入書籍資料";
+                    button2.Visible = false;
+                }
             }
         }
 
@@ -67,58 +71,9 @@ namespace CsharpReport
             {
                 if (GetDataType() == "excel")
                 {
-                    // 設定儲存excel檔
-                    SaveFileDialog save = new SaveFileDialog();
-                    save.InitialDirectory =
-                    Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                    save.FileName = "Export_Chart_Data7";
-                    save.Filter = "*.xlsx|*.xlsx";
-                    if (save.ShowDialog() != DialogResult.OK) return;
-                    // Excel 物件
-                    Excel.Application xls = null;
-                    try
-                    {
-                        // 打開excel
-                        xls = new Excel.Application();
-                        // 新增第一個sheet
-                        // Excel WorkBook
-                        Excel.Workbook book = xls.Workbooks.Add();
-                        //Excel.Worksheet Sheet = (Excel.Worksheet)book.Worksheets[1];
-                        Excel.Worksheet Sheet = xls.ActiveSheet;
-                        // 把資料塞進 Excel 內
-                        // 標題
-                        Sheet.Cells[1, 1] = "書籍編號";
-                        Sheet.Cells[1, 2] = "書名";
-                        Sheet.Cells[1, 3] = "作者";
-                        Sheet.Cells[1, 4] = "出版社";
-                        Sheet.Cells[1, 5] = "類型";
-                        Sheet.Cells[1, 6] = "借閱狀態";
-                        Sheet.Cells[1, 7] = "借閱人";
-                        // 內容
-                        for (int i = 0; i < dataGridView1.Length; i++)
-                        {
-                            Sheet.Cells[i + 2, 1] = Convert.ToString(dataGridView1[i][0]);
-                            Sheet.Cells[i + 2, 2] = Convert.ToString(dataGridView1[i][1]);
-                            Sheet.Cells[i + 2, 3] = Convert.ToString(dataGridView1[i][2]);
-                            Sheet.Cells[i + 2, 4] = Convert.ToString(dataGridView1[i][3]);
-                            Sheet.Cells[i + 2, 5] = Convert.ToString(dataGridView1[i][4]);
-                            Sheet.Cells[i + 2, 6] = Convert.ToString(dataGridView1[i][5]);
-                            Sheet.Cells[i + 2, 7] = Convert.ToString(dataGridView1[i][6]);
-
-                        }
-
-                        // 儲存檔案
-                        book.SaveAs(save.FileName);
-                    }
-                    catch (Exception)
-                    {
-                        throw;
-                    }
-                    finally
-                    {
-                        xls.Quit();
-                    }
+                    ExportExcel("search");
                 }
+
             }
             
         }
@@ -133,58 +88,7 @@ namespace CsharpReport
             //判斷欲匯出的資料型態
             if (GetDataType() == "excel")
             {
-                // 設定儲存excel檔
-                SaveFileDialog save = new SaveFileDialog();
-                save.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                save.FileName = "所有書籍資料";
-                save.Filter = "*.xlsx|*.xlsx";
-                if (save.ShowDialog() != DialogResult.OK) return;
-                // Excel 物件
-                Excel.Application xls = null;
-                try
-                {
-                    // 打開excel
-                    xls = new Excel.Application();
-                    // 新增第一個sheet
-                    // Excel WorkBook
-                    Excel.Workbook book = xls.Workbooks.Add();
-                    //Excel.Worksheet Sheet = (Excel.Worksheet)book.Worksheets[1];
-                    Excel.Worksheet Sheet = xls.ActiveSheet;
-                    // 把資料塞進 Excel 內
-                    // 標題
-                    Sheet.Cells[1, 1] = "書籍編號";
-                    Sheet.Cells[1, 2] = "書名";
-                    Sheet.Cells[1, 3] = "作者";
-                    Sheet.Cells[1, 4] = "出版社";
-                    Sheet.Cells[1, 5] = "類型";
-                    Sheet.Cells[1, 6] = "借閱狀態";
-                    Sheet.Cells[1, 7] = "借閱人";
-                    // 內容
-                    int i = 0;
-                    foreach (bookData bookData in GetBookData())
-                    {
-                        Sheet.Cells[i + 2, 1] = bookData.bookId;
-                        Sheet.Cells[i + 2, 2] = bookData.bookName;
-                        Sheet.Cells[i + 2, 3] = bookData.writer;
-                        Sheet.Cells[i + 2, 4] = bookData.publish;
-                        Sheet.Cells[i + 2, 5] = bookData.categoryName;
-                        Sheet.Cells[i + 2, 6] = bookData.status;
-                        Sheet.Cells[i + 2, 7] = bookData.memberName;
-                        i = i + 1;
-                    }
-
-                    // 儲存檔案
-                    book.SaveAs(save.FileName);
-                    MessageBox.Show("成功匯出資料");
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
-                finally
-                {
-                    xls.Quit();
-                }
+                ExportExcel("all");
             }
             else if (GetDataType() == "csv")
             {
@@ -211,7 +115,7 @@ namespace CsharpReport
                     tmp = String.Format("{0},{1}", tmp, bookData.memberName);
 
                     sbOutput.AppendLine(tmp);
-                    i = i + 1;
+                    i++;
                 }
                 // Create and write the csv file
                 System.IO.File.WriteAllText(strFilePath, sbOutput.ToString(), Encoding.UTF8);
@@ -301,6 +205,76 @@ namespace CsharpReport
                 DBConfig.sqlite_datareader.Close();
             }
             return result;
+        }
+
+        /// <summary>
+        /// 匯出excel
+        /// </summary>
+        /// <param name="dataMode">判斷匯出資料範圍</param>
+        private void ExportExcel(string dataMode)
+        {
+            List<bookData> bookDataModel = new List<bookData>();
+            if (dataMode == "all")
+            {
+                bookDataModel = GetBookData();
+            }
+            else if (dataMode == "search")
+            {
+                bookDataModel = dataGridViewdata;
+            }
+
+            // 設定儲存excel檔
+            SaveFileDialog save = new SaveFileDialog();
+            save.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            save.FileName = "書籍資料";
+            save.Filter = "*.xlsx|*.xlsx";
+            if (save.ShowDialog() != DialogResult.OK) return;
+            // Excel 物件
+            Excel.Application xls = null;
+            try
+            {
+                // 打開excel
+                xls = new Excel.Application();
+                // 新增第一個sheet
+                // Excel WorkBook
+                Excel.Workbook book = xls.Workbooks.Add();
+                //Excel.Worksheet Sheet = (Excel.Worksheet)book.Worksheets[1];
+                Excel.Worksheet Sheet = xls.ActiveSheet;
+                // 把資料塞進 Excel 內
+                // 標題
+                Sheet.Cells[1, 1] = "書籍編號";
+                Sheet.Cells[1, 2] = "書名";
+                Sheet.Cells[1, 3] = "作者";
+                Sheet.Cells[1, 4] = "出版社";
+                Sheet.Cells[1, 5] = "類型";
+                Sheet.Cells[1, 6] = "借閱狀態";
+                Sheet.Cells[1, 7] = "借閱人";
+                // 內容
+                int i = 0;
+                foreach (bookData bookData in bookDataModel)
+                {
+                    Sheet.Cells[i + 2, 1] = bookData.bookId;
+                    Sheet.Cells[i + 2, 2] = bookData.bookName;
+                    Sheet.Cells[i + 2, 3] = bookData.writer;
+                    Sheet.Cells[i + 2, 4] = bookData.publish;
+                    Sheet.Cells[i + 2, 5] = bookData.categoryName;
+                    Sheet.Cells[i + 2, 6] = bookData.status;
+                    Sheet.Cells[i + 2, 7] = bookData.memberName;
+                    i++;
+                }
+
+                // 儲存檔案
+                book.SaveAs(save.FileName);
+                MessageBox.Show("成功匯出資料");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                xls.Quit();
+            }
         }
     }
 

@@ -442,6 +442,7 @@
             this.button4.TabIndex = 19;
             this.button4.Text = "匯入資料";
             this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
             // button5
             // 
