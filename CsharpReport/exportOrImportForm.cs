@@ -14,6 +14,9 @@ using static CsharpReport.Form1;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Button;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Data.SQLite;
+using System.Net.NetworkInformation;
+using System.Net;
+using Newtonsoft.Json;
 
 namespace CsharpReport
 {
@@ -53,6 +56,11 @@ namespace CsharpReport
 
         }
 
+        /// <summary>
+        /// 匯出查詢結果或匯入書籍資料
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button1_Click(object sender, EventArgs e)
         {
             if (mode == "export")
@@ -127,9 +135,8 @@ namespace CsharpReport
             {
                 // 設定儲存excel檔
                 SaveFileDialog save = new SaveFileDialog();
-                save.InitialDirectory =
-                Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                save.FileName = "Export_Chart_Data7";
+                save.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                save.FileName = "所有書籍資料";
                 save.Filter = "*.xlsx|*.xlsx";
                 if (save.ShowDialog() != DialogResult.OK) return;
                 // Excel 物件
@@ -153,45 +160,22 @@ namespace CsharpReport
                     Sheet.Cells[1, 6] = "借閱狀態";
                     Sheet.Cells[1, 7] = "借閱人";
                     // 內容
-                    var command = DBConfig.sqlite_connect.CreateCommand();
-                    string sql = @"SELECT book_id, book_name, writer, publish,
-                            category_name, status, member_name
-                            FROM book_data
-                            LEFT JOIN category_data
-                            ON category = category_id
-                            LEFT JOIN member
-                            ON book_keeper = member_id";
-
-                    command.CommandText = sql;
-                    DBConfig.sqlite_datareader = command.ExecuteReader();
-
-                    if (DBConfig.sqlite_datareader.HasRows)
+                    int i = 0;
+                    foreach (bookData bookData in GetBookData())
                     {
-                        int i = 0;
-                        while (DBConfig.sqlite_datareader.Read()) //read every data
-                        {
-                            string _bookId = Convert.ToString(DBConfig.sqlite_datareader["book_id"]);
-                            string _bookName = Convert.ToString(DBConfig.sqlite_datareader["book_name"]);
-                            string _writer = Convert.ToString(DBConfig.sqlite_datareader["writer"]);
-                            string _publish = Convert.ToString(DBConfig.sqlite_datareader["publish"]);
-                            string _categoryName = Convert.ToString(DBConfig.sqlite_datareader["category_name"]);
-                            string _status = Convert.ToString(DBConfig.sqlite_datareader["status"]);
-                            string _memberName = Convert.ToString(DBConfig.sqlite_datareader["member_name"]);
-
-                            Sheet.Cells[i + 2, 1] = _bookId;
-                            Sheet.Cells[i + 2, 2] = _bookName;
-                            Sheet.Cells[i + 2, 3] = _writer;
-                            Sheet.Cells[i + 2, 4] = _publish;
-                            Sheet.Cells[i + 2, 5] = _categoryName;
-                            Sheet.Cells[i + 2, 6] = _status;
-                            Sheet.Cells[i + 2, 7] = _memberName;
-                            i = i+ 1;
-                        }
-                        DBConfig.sqlite_datareader.Close();
+                        Sheet.Cells[i + 2, 1] = bookData.bookId;
+                        Sheet.Cells[i + 2, 2] = bookData.bookName;
+                        Sheet.Cells[i + 2, 3] = bookData.writer;
+                        Sheet.Cells[i + 2, 4] = bookData.publish;
+                        Sheet.Cells[i + 2, 5] = bookData.categoryName;
+                        Sheet.Cells[i + 2, 6] = bookData.status;
+                        Sheet.Cells[i + 2, 7] = bookData.memberName;
+                        i = i + 1;
                     }
 
                     // 儲存檔案
                     book.SaveAs(save.FileName);
+                    MessageBox.Show("成功匯出資料");
                 }
                 catch (Exception)
                 {
@@ -201,6 +185,61 @@ namespace CsharpReport
                 {
                     xls.Quit();
                 }
+            }
+            else if (GetDataType() == "csv")
+            {
+                // 設定儲存excel檔
+                SaveFileDialog save = new SaveFileDialog();
+                save.InitialDirectory =
+                Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                save.FileName = "所有書籍資料.csv";
+                if (save.ShowDialog() != DialogResult.OK) return;
+                string strFilePath = save.FileName;
+                StringBuilder sbOutput = new StringBuilder();
+
+                string tmp = String.Format("書籍編號,書名,作者,出版社,類型,借閱狀態,借閱人");
+                sbOutput.AppendLine(tmp);
+                int i = 0;
+                foreach (bookData bookData in GetBookData())
+                {
+                    tmp = String.Format("{0}", bookData.bookId);
+                    tmp = String.Format("{0},{1}", tmp, bookData.bookName);
+                    tmp = String.Format("{0},{1}", tmp, bookData.writer);
+                    tmp = String.Format("{0},{1}", tmp, bookData.publish);
+                    tmp = String.Format("{0},{1}", tmp, bookData.categoryName);
+                    tmp = String.Format("{0},{1}", tmp, bookData.status);
+                    tmp = String.Format("{0},{1}", tmp, bookData.memberName);
+
+                    sbOutput.AppendLine(tmp);
+                    i = i + 1;
+                }
+                // Create and write the csv file
+                System.IO.File.WriteAllText(strFilePath, sbOutput.ToString(), Encoding.UTF8);
+
+                MessageBox.Show("成功匯出資料");
+            }
+            else if (GetDataType() == "json")
+            {
+                // 設定儲存json檔
+                SaveFileDialog save = new SaveFileDialog();
+                save.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                save.FileName = "所有書籍資料.json";
+                if (save.ShowDialog() != DialogResult.OK) return;
+
+                string strFilePath = save.FileName;
+
+                List<bookData> bookDataModel = GetBookData();
+
+                //Newtonsoft.Json序列化
+                string jsonData = JsonConvert.SerializeObject(bookDataModel);
+
+                System.IO.File.WriteAllText(strFilePath, jsonData);
+
+                MessageBox.Show("成功匯出資料");
+            }
+            else
+            {
+                MessageBox.Show(GetDataType());
             }
         }
 
@@ -224,5 +263,55 @@ namespace CsharpReport
                 return "wrong";
             }
         }
+
+        /// <summary>
+        /// 取得所有書籍資料
+        /// </summary>
+        /// <returns></returns>
+        public List<bookData> GetBookData() 
+        {
+            List<bookData> result = new List<bookData>();
+            var command = DBConfig.sqlite_connect.CreateCommand();
+            string sql = @"SELECT book_id, book_name, writer, publish,
+                            category_name, status, member_name
+                            FROM book_data
+                            LEFT JOIN category_data
+                            ON category = category_id
+                            LEFT JOIN member
+                            ON book_keeper = member_id";
+
+            command.CommandText = sql;
+            DBConfig.sqlite_datareader = command.ExecuteReader();
+
+            if (DBConfig.sqlite_datareader.HasRows)
+            {
+                while (DBConfig.sqlite_datareader.Read()) //read every data
+                {
+                    result.Add(new bookData() 
+                    {
+                        bookId = Convert.ToString(DBConfig.sqlite_datareader["book_id"]),
+                        bookName = Convert.ToString(DBConfig.sqlite_datareader["book_name"]),
+                        writer = Convert.ToString(DBConfig.sqlite_datareader["writer"]),
+                        publish = Convert.ToString(DBConfig.sqlite_datareader["publish"]),
+                        categoryName = Convert.ToString(DBConfig.sqlite_datareader["category_name"]),
+                        status = Convert.ToString(DBConfig.sqlite_datareader["status"]),
+                        memberName = Convert.ToString(DBConfig.sqlite_datareader["member_name"])
+                    });
+                }
+                DBConfig.sqlite_datareader.Close();
+            }
+            return result;
+        }
+    }
+
+    public class bookData
+    {
+        public string bookId { get; set; }
+        public string bookName { get; set; }
+        public string writer { get; set; }
+        public string publish { get; set; }
+        public string categoryName { get; set; }
+        public string status { get; set; }
+        public string memberName { get; set; }
     }
 }
