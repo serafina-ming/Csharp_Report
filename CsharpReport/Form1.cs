@@ -288,6 +288,7 @@ namespace CsharpReport
             exportOrImportForm = new exportOrImportForm();
             exportOrImportForm.setValue = dataSend;
             exportOrImportForm.ShowDialog();
+            GetBookData();
         }
     }
 }
