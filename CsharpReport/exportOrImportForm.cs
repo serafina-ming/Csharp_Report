@@ -139,12 +139,12 @@ namespace CsharpReport
                     System.IO.StreamReader sr = new System.IO.StreamReader(open.FileName);
 
                     string firstLine = sr.ReadLine();
+                    addForm addForm = new addForm();
                     while (!sr.EndOfStream)
                     {
                         string line = sr.ReadLine();
                         string[] words = line.Split(',');
                         int category = GetCategoryId(words[4]);
-                        addForm addForm = new addForm();
                         addForm.AddBook(words[1], words[2], words[3], category);
                     }
                     MessageBox.Show("成功匯入資料");
@@ -162,7 +162,15 @@ namespace CsharpReport
                     //Newtonsoft.Json反序列化: collection
                     List<bookData> json_collection = JsonConvert.DeserializeObject<List<bookData>>(lines);
 
-                    
+                    addForm addForm = new addForm();
+                    int i = 0;
+                    foreach (bookData bookData in json_collection)
+                    {
+                        int category = GetCategoryId(bookData.categoryName);
+                        addForm.AddBook(bookData.bookName, bookData.writer, bookData.publish, category);
+                        i++;
+                    }
+                    MessageBox.Show("成功匯入資料");
                 }
                 else
                 {
