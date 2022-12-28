@@ -119,6 +119,8 @@ namespace CsharpReport
             Load_DB();
             //設定dataGrid資料
             GetBookData();
+            //設定統計圖表
+            UpdateChart();
         }
 
         /// <summary>
@@ -165,6 +167,8 @@ namespace CsharpReport
             addForm.ShowDialog();
             //新增後，重新載入dataGrid資料
             GetBookData();
+            //新增後，重新載入統計圖表資料
+            UpdateChart();
         }
 
         /// <summary>
@@ -197,6 +201,7 @@ namespace CsharpReport
                     editForm.GetThisBookData();
                     editForm.ShowDialog();
                     GetBookData();
+                    UpdateChart();
                 }
                 else if (e.ColumnIndex == 8 && dataGridView1.Rows[e.RowIndex].Cells["Column1"].Value != null)
                 {
@@ -220,6 +225,7 @@ namespace CsharpReport
                                 MessageBox.Show("刪除成功");
                                 //刪除後，重新載入dataGrid資料
                                 GetBookData();
+                                UpdateChart();
                             }
                             catch (SQLiteException ex)
                             {
@@ -289,6 +295,49 @@ namespace CsharpReport
             exportOrImportForm.setValue = dataSend;
             exportOrImportForm.ShowDialog();
             GetBookData();
+            UpdateChart();
+        }
+
+        /// <summary>
+        /// 設定統計圖表值
+        /// </summary>
+        /// <param name="i_sort_bar"></param>
+        private void SetBar(Dictionary<string, int> i_sort_bar)
+        {
+            this.chart1.Series["類型"].Points.Clear();
+            foreach (var OneItem in i_sort_bar)
+            {
+                this.chart1.Series["類型"].Points.AddXY(OneItem.Key, OneItem.Value);
+            }
+        }
+
+        /// <summary>
+        /// 取得統計圖表資料並更新
+        /// </summary>
+        public void UpdateChart()
+        {
+            Dictionary<string, int> _sort_bar = new Dictionary<string, int>();
+            var command = DBConfig.sqlite_connect.CreateCommand();
+            string sql = @"SELECT category_name, count(*) AS count
+                            FROM book_data
+                            LEFT JOIN category_data
+                            ON category = category_id
+                            GROUP BY category;";
+
+            command.CommandText = sql;
+            DBConfig.sqlite_datareader = command.ExecuteReader();
+
+            if (DBConfig.sqlite_datareader.HasRows)
+            {
+                while (DBConfig.sqlite_datareader.Read()) //read every data
+                {
+                    _sort_bar.Add(Convert.ToString(DBConfig.sqlite_datareader["category_name"]), Convert.ToInt32(DBConfig.sqlite_datareader["count"]));
+                }
+                DBConfig.sqlite_datareader.Close();
+            }
+
+            SetBar(_sort_bar);
+
         }
     }
 }
