@@ -19,9 +19,15 @@ namespace CsharpReport
             InitializeComponent();
         }
 
+        /// <summary>
+        /// 新增資料按鈕
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button1_Click(object sender, EventArgs e)
         {
             Load_DB();
+            //檢查輸入值是否都不為空值
             if (textBox1.Text != "" && textBox2.Text != "" && textBox3.Text != "" && comboBox1.SelectedIndex > -1)
             {
                 if (AddBook(textBox1.Text, textBox2.Text, textBox3.Text, comboBox1.SelectedIndex+1))
@@ -51,6 +57,14 @@ namespace CsharpReport
 
         }
 
+        /// <summary>
+        /// 新增書籍資料至資料庫
+        /// </summary>
+        /// <param name="book_name">書名</param>
+        /// <param name="writer">作者</param>
+        /// <param name="publish">出版社</param>
+        /// <param name="category">類型</param>
+        /// <returns></returns>
         public bool AddBook(string book_name, string writer, string publish, int category)
         {
             var command = DBConfig.sqlite_connect.CreateCommand();

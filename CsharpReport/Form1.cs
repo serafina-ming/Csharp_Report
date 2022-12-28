@@ -247,6 +247,11 @@ namespace CsharpReport
             }
         }
 
+        /// <summary>
+        /// 匯出資料按鈕
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button3_Click(object sender, EventArgs e)
         {
             List<bookData> result = new List<bookData>();
@@ -271,6 +276,11 @@ namespace CsharpReport
             exportOrImportForm.ShowDialog();
         }
 
+        /// <summary>
+        /// 匯入資料按鈕
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button4_Click(object sender, EventArgs e)
         {
             var dataSend = new Object[] { "import" };

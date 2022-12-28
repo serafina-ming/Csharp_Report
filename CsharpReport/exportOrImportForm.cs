@@ -68,8 +68,10 @@ namespace CsharpReport
         /// <param name="e"></param>
         private void button1_Click(object sender, EventArgs e)
         {
+            //判斷匯出/匯入功能
             if (mode == "export")
             {
+                //判斷資料格式
                 if (GetDataType() == "excel")
                 {
                     ExportExcel("search");
@@ -89,6 +91,7 @@ namespace CsharpReport
             }
             else if (mode == "import")
             {
+                //判斷資料格式
                 if (GetDataType() == "excel")
                 {
                     // 讀取excel檔的檔案選擇視窗
