@@ -17,6 +17,7 @@ using System.Data.SQLite;
 using System.Net.NetworkInformation;
 using System.Net;
 using Newtonsoft.Json;
+using System.Runtime.Remoting.Messaging;
 
 namespace CsharpReport
 {
@@ -73,9 +74,139 @@ namespace CsharpReport
                 {
                     ExportExcel("search");
                 }
-
+                else if (GetDataType() == "csv")
+                {
+                    ExportCsv("search");
+                }
+                else if (GetDataType() == "json")
+                {
+                    ExportJson("search");
+                }
+                else
+                {
+                    MessageBox.Show(GetDataType());
+                }
             }
-            
+            else if (mode == "import")
+            {
+                if (GetDataType() == "excel")
+                {
+                    // 讀取excel檔的檔案選擇視窗
+                    OpenFileDialog open = new OpenFileDialog();
+                    open.InitialDirectory =
+                    Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                    open.Filter = "*.xlsx|*.xlsx";
+                    if (open.ShowDialog() != DialogResult.OK) return;
+                    MessageBox.Show(open.FileName);
+                    // Excel 物件
+                    Excel.Application xls = null;
+                    try
+                    {
+                        // 打開excel
+                        xls = new Excel.Application();
+                        // 打開第一個sheet
+                        // Excel WorkBook
+                        Excel.Workbook book = xls.Workbooks.Open(open.FileName);
+                        Excel.Worksheet Sheet = xls.ActiveSheet;
+
+                        //新增書籍
+                        addForm addForm = new addForm();
+                        // 讀取cell
+                        for (var i = 2; i < Sheet.UsedRange.Rows.Count; i++)
+                        {
+                            int category = GetCategoryId(Sheet.Cells[i, 5].Value.ToString());
+
+                            addForm.AddBook(Sheet.Cells[i, 2].Value.ToString(), Sheet.Cells[i, 3].Value.ToString(), Sheet.Cells[i, 4].Value.ToString(), category);
+                        }
+                        MessageBox.Show("成功匯入資料");
+                    }
+                    catch (Exception a)
+                    {
+                        MessageBox.Show(a.ToString());
+                        throw;
+                    }
+                    finally
+                    {
+                        xls.Quit();
+                    }
+                }
+                else if (GetDataType() == "csv") 
+                {
+                    OpenFileDialog open = new OpenFileDialog();
+                    open.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                    if (open.ShowDialog() != DialogResult.OK) return;
+
+                    System.IO.StreamReader sr = new System.IO.StreamReader(open.FileName);
+
+                    string firstLine = sr.ReadLine();
+                    while (!sr.EndOfStream)
+                    {
+                        string line = sr.ReadLine();
+                        string[] words = line.Split(',');
+                        int category = GetCategoryId(words[4]);
+                        addForm addForm = new addForm();
+                        addForm.AddBook(words[1], words[2], words[3], category);
+                    }
+                    MessageBox.Show("成功匯入資料");
+                }
+                else if (GetDataType() == "json")
+                {
+                    // 打開json檔
+                    OpenFileDialog open = new OpenFileDialog();
+                    open.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                    if (open.ShowDialog() != DialogResult.OK) return;
+
+                    System.IO.StreamReader sr = new System.IO.StreamReader(open.FileName);
+
+                    string lines = sr.ReadToEnd();
+                    //Newtonsoft.Json反序列化: collection
+                    List<bookData> json_collection = JsonConvert.DeserializeObject<List<bookData>>(lines);
+
+                    
+                }
+                else
+                {
+                    MessageBox.Show(GetDataType());
+                }
+            }
+        }
+
+        /// <summary>
+        /// 依據類型中文抓取類型id
+        /// </summary>
+        /// <param name="categoryName"></param>
+        /// <returns></returns>
+        private int GetCategoryId(string categoryName)
+        {
+            if (categoryName == "文學")
+            {
+                return 1;
+            }
+            else if (categoryName == "飲食料理")
+            {
+                return 2;
+            }
+            else if (categoryName == "心靈勵志")
+            {
+                return 3;
+            }
+            else if (categoryName == "漫畫")
+            {
+                return 4;
+            }
+            else if (categoryName == "輕小說")
+            {
+                return 5;
+            }
+            else if (categoryName == "電腦資訊")
+            {
+                return 6;
+            }
+            else if (categoryName == "藝術設計")
+            {
+                return 7;
+            }
+            return -1;
         }
 
         /// <summary>
@@ -92,54 +223,11 @@ namespace CsharpReport
             }
             else if (GetDataType() == "csv")
             {
-                // 設定儲存excel檔
-                SaveFileDialog save = new SaveFileDialog();
-                save.InitialDirectory =
-                Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                save.FileName = "所有書籍資料.csv";
-                if (save.ShowDialog() != DialogResult.OK) return;
-                string strFilePath = save.FileName;
-                StringBuilder sbOutput = new StringBuilder();
-
-                string tmp = String.Format("書籍編號,書名,作者,出版社,類型,借閱狀態,借閱人");
-                sbOutput.AppendLine(tmp);
-                int i = 0;
-                foreach (bookData bookData in GetBookData())
-                {
-                    tmp = String.Format("{0}", bookData.bookId);
-                    tmp = String.Format("{0},{1}", tmp, bookData.bookName);
-                    tmp = String.Format("{0},{1}", tmp, bookData.writer);
-                    tmp = String.Format("{0},{1}", tmp, bookData.publish);
-                    tmp = String.Format("{0},{1}", tmp, bookData.categoryName);
-                    tmp = String.Format("{0},{1}", tmp, bookData.status);
-                    tmp = String.Format("{0},{1}", tmp, bookData.memberName);
-
-                    sbOutput.AppendLine(tmp);
-                    i++;
-                }
-                // Create and write the csv file
-                System.IO.File.WriteAllText(strFilePath, sbOutput.ToString(), Encoding.UTF8);
-
-                MessageBox.Show("成功匯出資料");
+                ExportCsv("all");
             }
             else if (GetDataType() == "json")
             {
-                // 設定儲存json檔
-                SaveFileDialog save = new SaveFileDialog();
-                save.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                save.FileName = "所有書籍資料.json";
-                if (save.ShowDialog() != DialogResult.OK) return;
-
-                string strFilePath = save.FileName;
-
-                List<bookData> bookDataModel = GetBookData();
-
-                //Newtonsoft.Json序列化
-                string jsonData = JsonConvert.SerializeObject(bookDataModel);
-
-                System.IO.File.WriteAllText(strFilePath, jsonData);
-
-                MessageBox.Show("成功匯出資料");
+                ExportJson("all");
             }
             else
             {
@@ -275,6 +363,85 @@ namespace CsharpReport
             {
                 xls.Quit();
             }
+        }
+
+        /// <summary>
+        /// 匯出csv
+        /// </summary>
+        /// <param name="dataMode">判斷匯出資料範圍</param>
+        private void ExportCsv(string dataMode)
+        {
+            List<bookData> bookDataModel = new List<bookData>();
+            if (dataMode == "all")
+            {
+                bookDataModel = GetBookData();
+            }
+            else if (dataMode == "search")
+            {
+                bookDataModel = dataGridViewdata;
+            }
+
+            // 設定儲存excel檔
+            SaveFileDialog save = new SaveFileDialog();
+            save.InitialDirectory =
+            Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            save.FileName = "書籍資料.csv";
+            if (save.ShowDialog() != DialogResult.OK) return;
+            string strFilePath = save.FileName;
+            StringBuilder sbOutput = new StringBuilder();
+
+            string tmp = String.Format("書籍編號,書名,作者,出版社,類型,借閱狀態,借閱人");
+            sbOutput.AppendLine(tmp);
+            int i = 0;
+            foreach (bookData bookData in bookDataModel)
+            {
+                tmp = String.Format("{0}", bookData.bookId);
+                tmp = String.Format("{0},{1}", tmp, bookData.bookName);
+                tmp = String.Format("{0},{1}", tmp, bookData.writer);
+                tmp = String.Format("{0},{1}", tmp, bookData.publish);
+                tmp = String.Format("{0},{1}", tmp, bookData.categoryName);
+                tmp = String.Format("{0},{1}", tmp, bookData.status);
+                tmp = String.Format("{0},{1}", tmp, bookData.memberName);
+
+                sbOutput.AppendLine(tmp);
+                i++;
+            }
+            // Create and write the csv file
+            System.IO.File.WriteAllText(strFilePath, sbOutput.ToString(), Encoding.UTF8);
+
+            MessageBox.Show("成功匯出資料");
+        }
+
+        /// <summary>
+        /// 匯出json
+        /// </summary>
+        /// <param name="dataMode">判斷匯出資料範圍</param>
+        private void ExportJson(string dataMode)
+        {
+            List<bookData> bookDataModel = new List<bookData>();
+            if (dataMode == "all")
+            {
+                bookDataModel = GetBookData();
+            }
+            else if (dataMode == "search")
+            {
+                bookDataModel = dataGridViewdata;
+            }
+
+            // 設定儲存json檔
+            SaveFileDialog save = new SaveFileDialog();
+            save.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            save.FileName = "書籍資料.json";
+            if (save.ShowDialog() != DialogResult.OK) return;
+
+            string strFilePath = save.FileName;
+
+            //Newtonsoft.Json序列化
+            string jsonData = JsonConvert.SerializeObject(bookDataModel);
+
+            System.IO.File.WriteAllText(strFilePath, jsonData);
+
+            MessageBox.Show("成功匯出資料");
         }
     }
 

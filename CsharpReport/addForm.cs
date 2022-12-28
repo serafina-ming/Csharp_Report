@@ -24,7 +24,7 @@ namespace CsharpReport
             Load_DB();
             if (textBox1.Text != "" && textBox2.Text != "" && textBox3.Text != "" && comboBox1.SelectedIndex > -1)
             {
-                if (AddBook(textBox1.Text, textBox2.Text, textBox3.Text, comboBox1.SelectedIndex))
+                if (AddBook(textBox1.Text, textBox2.Text, textBox3.Text, comboBox1.SelectedIndex+1))
                 {
                     MessageBox.Show("新增成功");
                     textBox1.Text = "";
@@ -51,7 +51,7 @@ namespace CsharpReport
 
         }
 
-        private bool AddBook(string book_name, string writer, string publish, int category)
+        public bool AddBook(string book_name, string writer, string publish, int category)
         {
             var command = DBConfig.sqlite_connect.CreateCommand();
             command.CommandText = @"INSERT INTO book_data (book_name, writer, publish, category, status)
@@ -59,7 +59,7 @@ namespace CsharpReport
             command.Parameters.AddWithValue("@book_name", book_name);
             command.Parameters.AddWithValue("@writer", writer);
             command.Parameters.AddWithValue("@publish", publish);
-            command.Parameters.AddWithValue("@category", (category+1));
+            command.Parameters.AddWithValue("@category", (category));
             command.Parameters.AddWithValue("@status", "可借出");
             var result = command.ExecuteNonQuery();
 
