@@ -596,6 +596,43 @@ namespace CsharpReport
             document.Add(table_ch_1);
             table_ch_1.Complete();
 
+            // move to next page
+            // Creating an Area Break          
+            AreaBreak a_ch_2 = new AreaBreak();
+
+            // Adding area break to the PDF       
+            document.Add(a_ch_2);
+
+            /////////////////////////////////
+            // table chart 2
+
+            Paragraph header_3 = new Paragraph("統計資料QRcode\n")
+               .SetTextAlignment(TextAlignment.CENTER)
+               .SetFontSize(24)
+               .SetFont(font_tr);
+            document.Add(header_2);
+
+            Table table_ch_2 = new Table(2, true);
+            table_ch_2.SetFont(font_tr);
+
+            table_ch_2.AddHeaderCell("統計資料");
+            table_ch_2.AddHeaderCell("統計資料 QR Code");
+
+            string qrcodeData = GetQrcodeData();
+
+            // 出貨統計資料
+            table_ch_2.AddCell(new Paragraph(qrcodeData));
+
+            // 出貨統計資料 QR Code
+            System.Drawing.Bitmap bitmap_2 = get_qrcode(qrcodeData, pictureBox2.Width, pictureBox2.Height);
+            ImageData imageData_2 = ImageDataFactory.Create(BmpToBytes(bitmap_2));
+            iText.Layout.Element.Image image_ch2 = new iText.Layout.Element.Image(imageData_2);
+            image_ch2.SetAutoScale(true);
+            table_ch_2.AddCell(image_ch2);
+
+            document.Add(table_ch_2);
+            table_ch_2.Complete();
+
             document.Close();
 
             // 4. edit existed pdf
@@ -608,6 +645,7 @@ namespace CsharpReport
             draw_header(pdfDoc2, document2);
             document2.Close();
             File.Delete(dst);
+            MessageBox.Show("成功匯出pdf");
         }
 
         /// <summary>
@@ -668,6 +706,112 @@ namespace CsharpReport
             bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
             byte[] b = ms.GetBuffer();
             return b;
+        }
+
+        public Bitmap get_qrcode(string log, int i_width, int i_height)
+        {
+            System.Drawing.Bitmap bitmap = null;
+            //let string to qr-code
+            string strQrCodeContent = log;
+
+            ZXing.BarcodeWriter writer = new ZXing.BarcodeWriter
+            {
+                Format = ZXing.BarcodeFormat.QR_CODE,
+                Options = new ZXing.QrCode.QrCodeEncodingOptions
+                {
+                    //Create Photo 
+                    Height = i_width,
+                    Width = i_height,
+                    CharacterSet = "UTF-8",
+
+                    //錯誤修正容量
+                    //L水平    7%的字碼可被修正
+                    //M水平    15%的字碼可被修正
+                    //Q水平    25%的字碼可被修正
+                    //H水平    30%的字碼可被修正
+                    ErrorCorrection = ZXing.QrCode.Internal.ErrorCorrectionLevel.H
+                }
+
+            };
+            //Create Qr-code , use input string
+            bitmap = writer.Write(strQrCodeContent);
+            /*
+            string strDir;
+            strDir = Directory.GetCurrentDirectory();
+            strDir += "\\temp.jpg";
+            bitmap.Save(strDir, System.Drawing.Imaging.ImageFormat.Jpeg);
+            */
+            return bitmap;
+        }
+
+        private string GetQrcodeData()
+        {
+            string strQrcodeData = "";
+            var command = DBConfig.sqlite_connect.CreateCommand();
+            string sql = @"SELECT category_name, count(*) AS count
+                            FROM book_data
+                            LEFT JOIN category_data
+                            ON category = category_id
+                            GROUP BY category;";
+
+            command.CommandText = sql;
+            DBConfig.sqlite_datareader = command.ExecuteReader();
+
+            if (DBConfig.sqlite_datareader.HasRows)
+            {
+                while (DBConfig.sqlite_datareader.Read()) //read every data
+                {
+                    strQrcodeData = strQrcodeData + Convert.ToString(DBConfig.sqlite_datareader["category_name"])+"："+Convert.ToInt32(DBConfig.sqlite_datareader["count"]) + "\n";
+                }
+                DBConfig.sqlite_datareader.Close();
+            }
+            return strQrcodeData;
+        }
+
+        private void button12_Click(object sender, EventArgs e)
+        {
+            if(richTextBox1.Text == "")
+            {
+                MessageBox.Show("請輸入欲轉換文字");
+            }
+            else
+            {
+                //Use bitmap to storage qr-code
+                System.Drawing.Bitmap bitmap = null;
+                //let string to qr-code
+                string strQrCodeContent = richTextBox1.Text;
+
+                // QR Code產生器
+                ZXing.BarcodeWriter writer = new ZXing.BarcodeWriter
+                {
+                    Format = ZXing.BarcodeFormat.QR_CODE,
+                    Options = new ZXing.QrCode.QrCodeEncodingOptions
+                    {
+                        //Create Photo
+                        Height = 200,
+                        Width = 200,
+                        CharacterSet = "UTF-8",
+
+                        //錯誤修正容量
+                        //L水平    7%的字碼可被修正
+                        //M水平    15%的字碼可被修正
+                        //Q水平    25%的字碼可被修正
+                        //H水平    30%的字碼可被修正
+                        ErrorCorrection = ZXing.QrCode.Internal.ErrorCorrectionLevel.H
+                    }
+
+                };
+                //Create Qr-code , use input string
+                bitmap = writer.Write(strQrCodeContent);
+                //Storage bitmpa
+
+                string strDir;
+                strDir = Directory.GetCurrentDirectory();
+                strDir += "\\temp.jpg";
+                bitmap.Save(strDir, System.Drawing.Imaging.ImageFormat.Jpeg);
+                //Display to picturebox
+                pictureBox2.Image = bitmap;
+            }
         }
     }
 }
