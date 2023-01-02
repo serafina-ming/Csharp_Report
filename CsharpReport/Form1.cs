@@ -316,11 +316,9 @@ namespace CsharpReport
         /// <param name="i_sort_pie"></param>
         private void SetPie(Dictionary<string, int> i_sort_pie)
         {
-            int index = 0;
             foreach (var OneItem in i_sort_pie)
             {
-                index = this.chart2.Series["類型"].Points.AddXY(OneItem.Key, OneItem.Value);
-                this.chart2.Series["類型"].Points[index].Label = OneItem.Key + "：" + OneItem.Value;
+                this.chart2.Series["類型"].Points.AddXY(OneItem.Key, OneItem.Value);
             }
         }
 
