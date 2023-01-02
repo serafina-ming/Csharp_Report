@@ -9,6 +9,22 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Data.SQLite;
 using System.Net;
+using iText.IO.Font;
+using iText.Kernel.Colors;
+using iText.Kernel.Font;
+using iText.Kernel.Pdf.Canvas.Draw;
+using iText.Kernel.Pdf;
+using iText.Layout.Borders;
+using iText.Layout.Element;
+using iText.Layout.Properties;
+using iText.Forms;
+using iText.IO.Image;
+using iText.Kernel.Geom;
+using iText.Kernel.Pdf.Canvas;
+using iText.Kernel.Pdf.Extgstate;
+using iText.Layout;
+using System.IO;
+using System.Drawing.Imaging;
 
 namespace CsharpReport
 {
@@ -427,6 +443,231 @@ namespace CsharpReport
             {
                 xls.Quit();
             }
+        }
+
+        /// <summary>
+        /// 匯出pdf按鈕
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button11_Click(object sender, EventArgs e)
+        {
+            PrintPDF();
+        }
+
+        /// <summary>
+        /// 設定pdf檔案
+        /// </summary>
+        void PrintPDF()
+        {
+            // Set the output dir and file name
+            // string directory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+            string src = "./test.pdf";
+            string dst = @"./new_test.pdf";
+
+            //manipulatePdf(src, dst);
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop); ;
+            saveFileDialog.FileName = "書籍資料";
+            saveFileDialog.Filter = "*.pdf|*.pdf";
+            saveFileDialog.FilterIndex = 2;
+            saveFileDialog.RestoreDirectory = true;
+
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                //Get the path of specified file
+                dst = saveFileDialog.FileName;
+                manipulatePdf(src, dst);
+            }
+
+        }
+
+        /// <summary>
+        /// 設定pdf內容
+        /// </summary>
+        /// <param name="src"></param>
+        /// <param name="dst"></param>
+        void manipulatePdf(String src, String dst)
+        {
+            src = dst;
+            dst = dst + "_tmp";
+
+            // 1. create pdf
+            PdfWriter writer = new PdfWriter(dst);
+            PdfDocument pdf = new PdfDocument(writer);
+            Document document = new Document(pdf);
+
+            // 標楷體
+            PdfFont font_tr = PdfFontFactory.CreateFont(@"c:/Windows/fonts/kaiu.ttf", PdfEncodings.IDENTITY_H);
+            // 正黑體
+            //PdfFont font_msjh = PdfFontFactory.CreateFont(@"./msjh.ttf", PdfEncodings.IDENTITY_H);
+            document.SetFont(font_tr); // 預設中文字型
+
+            // 2. 加文字
+
+            // 2.1. add header
+            Paragraph header_1 = new Paragraph("書籍資料")
+               .SetTextAlignment(TextAlignment.CENTER)
+               .SetFontSize(36)
+               .SetFont(font_tr);
+            document.Add(header_1);
+
+            // Line separator
+            LineSeparator ls = new LineSeparator(new SolidLine());
+            document.Add(ls);
+
+            float[] colWidths = { 1, 6, 3, 2, 2, 2, 2 };
+            // Creating a table       
+            Table table = new Table(UnitValue.CreatePercentArray(colWidths));
+
+            //增加段落一
+            Paragraph paragraph = new Paragraph();
+
+            //讀取grid資料
+            String Gridparagraph = "";
+
+            //表格標題列
+            for (int i = 0; i < dataGridView1.ColumnCount - 2; i++)
+            {
+                table.AddHeaderCell(new Paragraph(dataGridView1.Columns[i].HeaderText));
+            }
+
+            //表格內容
+            for (int i = 0; i < dataGridView1.Rows.Count; i++)
+            {
+                for (int j = 0; j < dataGridView1.ColumnCount - 2; j++)
+                {
+                    Gridparagraph = Convert.ToString(dataGridView1.Rows[i].Cells[j].Value);
+                    // Adding cells to the table       
+                    Cell cell = new Cell().Add(new Paragraph(Gridparagraph));
+                    cell.SetBorder(new SolidBorder(ColorConstants.WHITE, 0));
+                    cell.SetBorderBottom(new SolidBorder(ColorConstants.GRAY, 0));
+                    //table.addCell(cell);
+                    table.AddCell(cell);
+                }
+            }
+
+            // Adding Table to document        
+            document.Add(table);
+            table.Complete();
+
+            // move to next page
+            // Creating an Area Break          
+            AreaBreak a_ch_1 = new AreaBreak();
+
+            // Adding area break to the PDF       
+            document.Add(a_ch_1);
+
+            /////////////////////////////////
+            // table chart 1
+
+            Paragraph header_2 = new Paragraph("書籍類型統計圖表\n")
+               .SetTextAlignment(TextAlignment.CENTER)
+               .SetFontSize(24)
+               .SetFont(font_tr);
+            document.Add(header_2);
+
+            Table table_ch_1 = new Table(1, true);
+            table_ch_1.SetFont(font_tr);
+
+            table_ch_1.AddHeaderCell("書籍類型數量");
+
+            // 出貨各類別數量
+            Bitmap bitmap_ch1_1 = new Bitmap(chart1.Width, chart1.Height, PixelFormat.Format24bppRgb);
+            chart1.DrawToBitmap(bitmap_ch1_1, new System.Drawing.Rectangle(0, 0, chart1.Width, chart1.Height));
+            ImageData imageData_ch1_1 = ImageDataFactory.Create(BmpToBytes(bitmap_ch1_1));
+            iText.Layout.Element.Image image_ch1_1 = new iText.Layout.Element.Image(imageData_ch1_1);
+            image_ch1_1.SetAutoScale(true);
+            table_ch_1.AddCell(image_ch1_1);
+
+
+            table_ch_1.AddCell("書籍類型數量比例");
+
+            // 出貨各類別數量
+            Bitmap bitmap_ch1_2 = new Bitmap(chart2.Width, chart2.Height, PixelFormat.Format24bppRgb);
+            chart2.DrawToBitmap(bitmap_ch1_2, new System.Drawing.Rectangle(0, 0, chart2.Width, chart2.Height));
+            ImageData imageData_ch1_2 = ImageDataFactory.Create(BmpToBytes(bitmap_ch1_2));
+            iText.Layout.Element.Image image_ch1_2 = new iText.Layout.Element.Image(imageData_ch1_2);
+            image_ch1_2.SetAutoScale(true);
+            table_ch_1.AddCell(image_ch1_2);
+
+            document.Add(table_ch_1);
+            table_ch_1.Complete();
+
+            document.Close();
+
+            // 4. edit existed pdf
+            PdfReader reader2 = new PdfReader(dst);
+            PdfWriter writer2 = new PdfWriter(src);
+            PdfDocument pdfDoc2 = new PdfDocument(reader2, writer2);
+            Document document2 = new Document(pdfDoc2);
+
+            // 5. add Page numbers
+            draw_header(pdfDoc2, document2);
+            document2.Close();
+            File.Delete(dst);
+        }
+
+        /// <summary>
+        /// 設定pdf頁首頁尾、浮水印
+        /// </summary>
+        /// <param name="pdfDoc"></param>
+        /// <param name="document"></param>
+        void draw_header(PdfDocument pdfDoc, Document document)
+        {
+            PdfFont font = PdfFontFactory.CreateFont(@"c:/Windows/fonts/kaiu.ttf", PdfEncodings.IDENTITY_H);
+            iText.Kernel.Geom.Rectangle pageSize;
+            PdfCanvas canvas;
+            int n = pdfDoc.GetNumberOfPages();
+            for (int i = 1; i <= n; i++)
+            {
+                PdfPage page = pdfDoc.GetPage(i);
+                pageSize = page.GetPageSize();
+                canvas = new PdfCanvas(page);
+
+                //Draw header text
+                canvas.BeginText()
+                    .SetFontAndSize(font, 15)
+                    .MoveText(pageSize.GetWidth() / 2 -30, pageSize.GetHeight() - 20)
+                    .ShowText("圖書系統")
+                    .EndText();
+
+                //Draw footer line
+                iText.Kernel.Colors.Color bgColour = new DeviceRgb(0, 0, 0);
+                canvas.SetStrokeColor(bgColour)
+                    .SetLineWidth(2.2f)
+                    .MoveTo(pageSize.GetWidth() / 2 - 30, 20)
+                    .LineTo(pageSize.GetWidth() / 2 + 30, 20)
+                    .Stroke();
+
+                //Draw page number
+                canvas.BeginText()
+                    .SetFontAndSize(font, 7)
+                    .MoveText(pageSize.GetWidth() / 2 - 7, 10)
+                    .ShowText(i.ToString())
+                    .ShowText(" of ")
+                    .ShowText(n.ToString())
+                    .EndText();
+
+                //Draw watermark
+                Paragraph p = new Paragraph("極  機  密 \n Confidential").SetFont(font).SetFontSize(60);
+                canvas.SaveState();
+                PdfExtGState gs1 = new PdfExtGState().SetFillOpacity(0.2f);
+                canvas.SetExtGState(gs1);
+                document.ShowTextAligned(p, pageSize.GetWidth() / 2, pageSize.GetHeight() / 2, pdfDoc.GetPageNumber(page), TextAlignment.CENTER, VerticalAlignment.MIDDLE, 45);
+                canvas.RestoreState();
+            }
+        }
+
+        //Bitmap to Byte array
+        public byte[] BmpToBytes(Bitmap bmp)
+        {
+            System.IO.MemoryStream ms = new System.IO.MemoryStream();
+            bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+            byte[] b = ms.GetBuffer();
+            return b;
         }
     }
 }

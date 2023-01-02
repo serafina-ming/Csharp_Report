@@ -53,14 +53,17 @@ namespace CsharpReport
             if (chartType == "bar")
             {
                 chart1.SaveImage(save.FileName, System.Drawing.Imaging.ImageFormat.Jpeg);
+                MessageBox.Show("成功匯出圖表");
             }
             else if (chartType == "pie")
             {
                 chart2.SaveImage(save.FileName, System.Drawing.Imaging.ImageFormat.Jpeg);
+                MessageBox.Show("成功匯出圖表");
             }
             else if (chartType == "line")
             {
                 chart3.SaveImage(save.FileName, System.Drawing.Imaging.ImageFormat.Jpeg);
+                MessageBox.Show("成功匯出圖表");
             }
             else
             {
