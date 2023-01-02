@@ -172,6 +172,12 @@
     <Compile Include="editForm.Designer.cs">
       <DependentUpon>editForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="exportChartForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="exportChartForm.Designer.cs">
+      <DependentUpon>exportChartForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="exportOrImportForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -203,6 +209,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="editForm.resx">
       <DependentUpon>editForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="exportChartForm.resx">
+      <DependentUpon>exportChartForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="exportOrImportForm.resx">
       <DependentUpon>exportOrImportForm.cs</DependentUpon>

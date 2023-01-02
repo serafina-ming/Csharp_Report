@@ -191,8 +191,7 @@ namespace CsharpReport
                 //MessageBox.Show(dataGridView1.Columns[e.ColumnIndex].ToString());
                 if (e.ColumnIndex == 7 && dataGridView1.Rows[e.RowIndex].Cells["Column1"].Value != null)
                 {
-                    //點下去顯示書籍編號
-                    //MessageBox.Show(dataGridView1.Rows[e.RowIndex].Cells["Column1"].Value.ToString());
+                    //取得書籍編號
                     int bookId = (int)dataGridView1.Rows[e.RowIndex].Cells["Column1"].Value;
                     var a = new Object[] { bookId };
                     editForm editForm;
@@ -299,7 +298,7 @@ namespace CsharpReport
         }
 
         /// <summary>
-        /// 設定統計圖表值
+        /// 設定統計圖表值(長條圖)
         /// </summary>
         /// <param name="i_sort_bar"></param>
         private void SetBar(Dictionary<string, int> i_sort_bar)
@@ -312,11 +311,38 @@ namespace CsharpReport
         }
 
         /// <summary>
+        /// 設定統計圖表值(圓餅圖)
+        /// </summary>
+        /// <param name="i_sort_pie"></param>
+        private void SetPie(Dictionary<string, int> i_sort_pie)
+        {
+            int index = 0;
+            foreach (var OneItem in i_sort_pie)
+            {
+                index = this.chart2.Series["類型"].Points.AddXY(OneItem.Key, OneItem.Value);
+                this.chart2.Series["類型"].Points[index].Label = OneItem.Key + "：" + OneItem.Value;
+            }
+        }
+
+        /// <summary>
+        /// 設定統計圖表值(折線圖)
+        /// </summary>
+        /// <param name="i_sort_line"></param>
+        private void SetLine(Dictionary<string, int> i_sort_line)
+        {
+            int index = 0;
+            foreach (var OneItem in i_sort_line)
+            {
+                index = this.chart3.Series["類型"].Points.AddXY(OneItem.Key, OneItem.Value);
+            }
+        }
+
+        /// <summary>
         /// 取得統計圖表資料並更新
         /// </summary>
         public void UpdateChart()
         {
-            Dictionary<string, int> _sort_bar = new Dictionary<string, int>();
+            Dictionary<string, int> _sort_data = new Dictionary<string, int>();
             var command = DBConfig.sqlite_connect.CreateCommand();
             string sql = @"SELECT category_name, count(*) AS count
                             FROM book_data
@@ -331,13 +357,14 @@ namespace CsharpReport
             {
                 while (DBConfig.sqlite_datareader.Read()) //read every data
                 {
-                    _sort_bar.Add(Convert.ToString(DBConfig.sqlite_datareader["category_name"]), Convert.ToInt32(DBConfig.sqlite_datareader["count"]));
+                    _sort_data.Add(Convert.ToString(DBConfig.sqlite_datareader["category_name"]), Convert.ToInt32(DBConfig.sqlite_datareader["count"]));
                 }
                 DBConfig.sqlite_datareader.Close();
             }
 
-            SetBar(_sort_bar);
-
+            SetBar(_sort_data);
+            SetPie(_sort_data);
+            SetLine(_sort_data);
         }
 
         /// <summary>
@@ -347,13 +374,11 @@ namespace CsharpReport
         /// <param name="e"></param>
         private void button5_Click(object sender, EventArgs e)
         {
-            SaveFileDialog save = new SaveFileDialog();
-            save.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            save.FileName = "書籍類型統計圖";
-            save.Filter = "*.jpg|*.jpg";
-            if (save.ShowDialog() != DialogResult.OK) return;
-
-            chart1.SaveImage(save.FileName, System.Drawing.Imaging.ImageFormat.Jpeg);
+            var a = new Object[] { chart1, chart2, chart3 };
+            exportChartForm exportChartForm;
+            exportChartForm = new exportChartForm();
+            exportChartForm.setValue = a;
+            exportChartForm.ShowDialog();
         }
 
         /// <summary>
