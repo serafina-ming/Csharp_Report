@@ -140,13 +140,13 @@ namespace CsharpReport
         }
 
         /// <summary>
-        /// menuStrip說明按鈕
+        /// menuStrip說明按鈕(關於)
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("關於");
+            MessageBox.Show("簡易圖書系統\n可紀錄書籍資料，有新增、修改、刪除功能，還能匯出資料及圖表，以及匯出pdf檔跟QRcode。");
         }
 
         /// <summary>
