@@ -332,6 +332,7 @@ namespace CsharpReport
         /// <param name="i_sort_pie"></param>
         private void SetPie(Dictionary<string, int> i_sort_pie)
         {
+            this.chart2.Series["類型"].Points.Clear();
             foreach (var OneItem in i_sort_pie)
             {
                 this.chart2.Series["類型"].Points.AddXY(OneItem.Key, OneItem.Value);
@@ -344,7 +345,7 @@ namespace CsharpReport
         /// <param name="i_sort_line"></param>
         private void SetLine(Dictionary<string, int> i_sort_line)
         {
-            int index = 0;
+            this.chart3.Series["類型"].Points.Clear();
             foreach (var OneItem in i_sort_line)
             {
                 index = this.chart3.Series["類型"].Points.AddXY(OneItem.Key, OneItem.Value);
