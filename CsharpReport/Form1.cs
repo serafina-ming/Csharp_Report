@@ -349,7 +349,7 @@ namespace CsharpReport
         {
             SaveFileDialog save = new SaveFileDialog();
             save.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            save.FileName = "Export_Chart1_JPG";
+            save.FileName = "書籍類型統計圖";
             save.Filter = "*.jpg|*.jpg";
             if (save.ShowDialog() != DialogResult.OK) return;
 
@@ -365,7 +365,7 @@ namespace CsharpReport
         {
             SaveFileDialog save = new SaveFileDialog();
             save.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            save.FileName = "Export_Chart_Data";
+            save.FileName = "書籍類型統計資料";
             save.Filter = "*.xlsx|*.xlsx";
             if (save.ShowDialog() != DialogResult.OK) return;
 
