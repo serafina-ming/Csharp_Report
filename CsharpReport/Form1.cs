@@ -339,5 +339,71 @@ namespace CsharpReport
             SetBar(_sort_bar);
 
         }
+
+        /// <summary>
+        /// 匯出統計圖表
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button5_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog save = new SaveFileDialog();
+            save.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            save.FileName = "Export_Chart1_JPG";
+            save.Filter = "*.jpg|*.jpg";
+            if (save.ShowDialog() != DialogResult.OK) return;
+
+            chart1.SaveImage(save.FileName, System.Drawing.Imaging.ImageFormat.Jpeg);
+        }
+
+        /// <summary>
+        /// 匯出統計資料
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button6_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog save = new SaveFileDialog();
+            save.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            save.FileName = "Export_Chart_Data";
+            save.Filter = "*.xlsx|*.xlsx";
+            if (save.ShowDialog() != DialogResult.OK) return;
+
+            // Excel 物件
+
+            Microsoft.Office.Interop.Excel.Application xls = null;
+            try
+            {
+                xls = new Microsoft.Office.Interop.Excel.Application();
+                // Excel WorkBook
+                Microsoft.Office.Interop.Excel.Workbook book = xls.Workbooks.Add();
+                //Excel.Worksheet Sheet = (Excel.Worksheet)book.Worksheets[1];
+                Microsoft.Office.Interop.Excel.Worksheet Sheet = xls.ActiveSheet;
+
+                // 把資料塞進 Excel 內
+
+                // 標題
+                Sheet.Cells[1, 1] = "類型";
+                Sheet.Cells[1, 2] = "數量";
+
+                // 內容
+                for (int k = 0; k < this.chart1.Series["類型"].Points.Count; k++)
+                {
+                    Sheet.Cells[k + 2, 1] = this.chart1.Series["類型"].Points[k].AxisLabel.ToString();
+                    Sheet.Cells[k + 2, 2] = this.chart1.Series["類型"].Points[k].YValues[0].ToString();
+                }
+
+                // 儲存檔案
+                book.SaveAs(save.FileName);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                xls.Quit();
+            }
+        }
     }
 }
