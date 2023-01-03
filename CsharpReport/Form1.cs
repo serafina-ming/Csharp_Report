@@ -521,38 +521,35 @@ namespace CsharpReport
 
             float[] colWidths = { 1, 6, 3, 2, 2, 2, 2 };
             // Creating a table       
-            Table table = new Table(UnitValue.CreatePercentArray(colWidths));
-
-            //增加段落一
-            Paragraph paragraph = new Paragraph();
+            Table table_data = new Table(UnitValue.CreatePercentArray(colWidths));
 
             //讀取grid資料
             String Gridparagraph = "";
+            int tableNum = dataGridView1.ColumnCount - 2;
 
             //表格標題列
-            for (int i = 0; i < dataGridView1.ColumnCount - 2; i++)
+            for (int k = 0; k < tableNum; k++)
             {
-                table.AddHeaderCell(new Paragraph(dataGridView1.Columns[i].HeaderText));
+                table_data.AddHeaderCell(new Paragraph(dataGridView1.Columns[k].HeaderText));
             }
 
             //表格內容
             for (int i = 0; i < dataGridView1.Rows.Count; i++)
             {
-                for (int j = 0; j < dataGridView1.ColumnCount - 2; j++)
+                for (int j = 0; j < tableNum; j++)
                 {
                     Gridparagraph = Convert.ToString(dataGridView1.Rows[i].Cells[j].Value);
                     // Adding cells to the table       
                     Cell cell = new Cell().Add(new Paragraph(Gridparagraph));
                     cell.SetBorder(new SolidBorder(ColorConstants.WHITE, 0));
                     cell.SetBorderBottom(new SolidBorder(ColorConstants.GRAY, 0));
-                    //table.addCell(cell);
-                    table.AddCell(cell);
+                    table_data.AddCell(cell);
                 }
             }
 
             // Adding Table to document        
-            document.Add(table);
-            table.Complete();
+            document.Add(table_data);
+            //table_data.Complete();
 
             // move to next page
             // Creating an Area Break          
