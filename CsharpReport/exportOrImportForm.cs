@@ -100,7 +100,6 @@ namespace CsharpReport
                     Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
                     open.Filter = "*.xlsx|*.xlsx";
                     if (open.ShowDialog() != DialogResult.OK) return;
-                    MessageBox.Show(open.FileName);
                     // Excel 物件
                     Excel.Application xls = null;
                     try
