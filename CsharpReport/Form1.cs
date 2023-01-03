@@ -435,6 +435,7 @@ namespace CsharpReport
 
                 // 儲存檔案
                 book.SaveAs(save.FileName);
+                MessageBox.Show("成功匯出統計資料");
             }
             catch (Exception)
             {
