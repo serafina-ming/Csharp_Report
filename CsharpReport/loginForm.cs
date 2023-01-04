@@ -80,6 +80,11 @@ namespace CsharpReport
             }
         }
 
+        /// <summary>
+        /// 開啟註冊視窗
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button2_Click(object sender, EventArgs e)
         {
             registerForm registerForm;

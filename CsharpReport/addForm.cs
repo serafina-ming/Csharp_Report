@@ -30,7 +30,7 @@ namespace CsharpReport
             //檢查輸入值是否都不為空值
             if (textBox1.Text != "" && textBox2.Text != "" && textBox3.Text != "" && comboBox1.SelectedIndex > -1)
             {
-                if (AddBook(textBox1.Text, textBox2.Text, textBox3.Text, comboBox1.SelectedIndex+1))
+                if (AddBook(textBox1.Text, textBox2.Text, textBox3.Text, comboBox1.SelectedIndex + 1))
                 {
                     MessageBox.Show("新增成功");
                     textBox1.Text = "";

@@ -30,7 +30,7 @@ namespace CsharpReport
         }
 
         /// <summary>
-        /// 設定初始值，從Form1傳入
+        /// 設定初始值(書籍編號)，從Form1傳入
         /// </summary>
         public object[] setValue
         {
@@ -40,6 +40,9 @@ namespace CsharpReport
             }
         }
 
+        /// <summary>
+        /// 依據書籍編號取得書籍資料
+        /// </summary>
         public void GetThisBookData()
         {
             var command = DBConfig.sqlite_connect.CreateCommand();
@@ -112,7 +115,7 @@ namespace CsharpReport
                     string member_id = Convert.ToString(DBConfig.sqlite_datareader["member_id"]);
                     string member_name = Convert.ToString(DBConfig.sqlite_datareader["member_name"]);
 
-                    comboBox2.Items.Add(new ComboBoxItem(member_id, member_id+" "+member_name));
+                    comboBox2.Items.Add(new ComboBoxItem(member_id, member_id + " " + member_name));
                 }
             }
             DBConfig.sqlite_datareader.Close();
@@ -157,8 +160,6 @@ namespace CsharpReport
             }
 
         }
-        //參考
-        //https://blog.hungwin.com.tw/csharp-winform-combobox-value-text/
 
         /// <summary>
         /// 更新按鈕
@@ -198,14 +199,13 @@ namespace CsharpReport
             {
                 MessageBox.Show("請填寫借閱人");
             }
+
             if (status == true)
             {
                 try
                 {
                     command.ExecuteNonQuery();
-                    var confirmResult = MessageBox.Show("更新成功，是否回到主畫面？",
-                                     "更新成功！！",
-                                     MessageBoxButtons.YesNo);
+                    var confirmResult = MessageBox.Show("更新成功，是否回到主畫面？", "更新成功！！", MessageBoxButtons.YesNo);
                     if (confirmResult == DialogResult.Yes)
                     {
                         this.Close();
@@ -217,7 +217,7 @@ namespace CsharpReport
                 }
                 catch (SqlException ex)
                 {
-                    //MessageBox.Show(ex.Message);
+                    //直接輸出錯誤訊息 MessageBox.Show(ex.Message);
                     MessageBox.Show("系統錯誤");
                 }
             }
@@ -236,7 +236,7 @@ namespace CsharpReport
                 comboBox2.SelectedIndex = -1;
                 comboBox2.Enabled = false;
             }
-            else if(radioButton2.Checked == true)
+            else if (radioButton2.Checked == true)
             {
                 comboBox2.Enabled = true;
             }
@@ -250,11 +250,10 @@ namespace CsharpReport
         private void button2_Click(object sender, EventArgs e)
         {
             var bookId = label7.Text;
+            //判斷借閱狀態，已借出不可刪除
             if (_status == "可借出")
             {
-                var confirmResult = MessageBox.Show("確定刪除此書？",
-                                            "刪除書籍！！",
-                                            MessageBoxButtons.YesNo);
+                var confirmResult = MessageBox.Show("確定刪除此書？", "刪除書籍！！", MessageBoxButtons.YesNo);
                 if (confirmResult == DialogResult.Yes)
                 {
                     var command = DBConfig.sqlite_connect.CreateCommand();
@@ -277,7 +276,7 @@ namespace CsharpReport
             {
                 MessageBox.Show("外借中不可刪除");
             }
-            
+
         }
     }
 }

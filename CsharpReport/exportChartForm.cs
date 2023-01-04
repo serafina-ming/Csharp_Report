@@ -26,7 +26,7 @@ namespace CsharpReport
         }
 
         /// <summary>
-        /// 取得圖表值
+        /// 取得圖表
         /// </summary>
         public object[] setValue
         {
@@ -49,7 +49,7 @@ namespace CsharpReport
             save.Filter = "*.jpg|*.jpg";
             if (save.ShowDialog() != DialogResult.OK) return;
 
-            //匯出對印樣式圖表
+            //匯出對應樣式圖表
             if (chartType == "bar")
             {
                 chart1.SaveImage(save.FileName, System.Drawing.Imaging.ImageFormat.Jpeg);

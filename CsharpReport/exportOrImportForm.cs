@@ -58,7 +58,6 @@ namespace CsharpReport
         {
             DBConfig.sqlite_connect = new SQLiteConnection(DBConfig.dbPath);
             DBConfig.sqlite_connect.Open();// Open
-
         }
 
         /// <summary>
@@ -133,7 +132,7 @@ namespace CsharpReport
                         xls.Quit();
                     }
                 }
-                else if (GetDataType() == "csv") 
+                else if (GetDataType() == "csv")
                 {
                     OpenFileDialog open = new OpenFileDialog();
                     open.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
@@ -184,6 +183,7 @@ namespace CsharpReport
 
         /// <summary>
         /// 依據類型中文抓取類型id
+        /// TODO：更改成跟資料庫資料對照
         /// </summary>
         /// <param name="categoryName"></param>
         /// <returns></returns>
@@ -271,7 +271,7 @@ namespace CsharpReport
         /// 取得所有書籍資料
         /// </summary>
         /// <returns></returns>
-        public List<bookData> GetBookData() 
+        public List<bookData> GetBookData()
         {
             List<bookData> result = new List<bookData>();
             var command = DBConfig.sqlite_connect.CreateCommand();
@@ -290,7 +290,7 @@ namespace CsharpReport
             {
                 while (DBConfig.sqlite_datareader.Read()) //read every data
                 {
-                    result.Add(new bookData() 
+                    result.Add(new bookData()
                     {
                         bookId = Convert.ToString(DBConfig.sqlite_datareader["book_id"]),
                         bookName = Convert.ToString(DBConfig.sqlite_datareader["book_name"]),
@@ -337,7 +337,6 @@ namespace CsharpReport
                 // 新增第一個sheet
                 // Excel WorkBook
                 Excel.Workbook book = xls.Workbooks.Add();
-                //Excel.Worksheet Sheet = (Excel.Worksheet)book.Worksheets[1];
                 Excel.Worksheet Sheet = xls.ActiveSheet;
                 // 把資料塞進 Excel 內
                 // 標題

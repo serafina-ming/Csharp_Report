@@ -28,6 +28,13 @@ namespace CsharpReport
             InitializeComponent();
         }
 
+        /// <summary>
+        /// 新增會員資料
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="account"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
         private bool CreateMember(string name, string account, string password)
         {
             if (!CheckAccountExist(account))
@@ -95,6 +102,11 @@ namespace CsharpReport
             }
         }
 
+        /// <summary>
+        /// 輸入框啟用enter輸入功能
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void textBox3_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (e.KeyChar == (char)13)

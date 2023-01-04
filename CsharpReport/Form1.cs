@@ -25,6 +25,7 @@ using iText.Kernel.Pdf.Extgstate;
 using iText.Layout;
 using System.IO;
 using System.Drawing.Imaging;
+using Org.BouncyCastle.Utilities;
 
 namespace CsharpReport
 {
@@ -80,10 +81,10 @@ namespace CsharpReport
             {
                 sql += "AND category = @category ";
             }
-            if((checkBox1.Checked || checkBox2.Checked) && !(checkBox1.Checked && checkBox2.Checked))
+            if ((checkBox1.Checked || checkBox2.Checked) && !(checkBox1.Checked && checkBox2.Checked))
             {
                 sql += "AND status = @status ";
-                if(checkBox1.Checked)
+                if (checkBox1.Checked)
                 {
                     status = checkBox1.Text;
                 }
@@ -92,11 +93,11 @@ namespace CsharpReport
                     status = checkBox2.Text;
                 }
             }
-            
+
             command.CommandText = sql;
-            command.Parameters.AddWithValue("@book_name", "%"+textBox1.Text+"%");
-            command.Parameters.AddWithValue("@writer", "%"+textBox2.Text+"%");
-            command.Parameters.AddWithValue("@publish", "%"+textBox3.Text+"%");
+            command.Parameters.AddWithValue("@book_name", "%" + textBox1.Text + "%");
+            command.Parameters.AddWithValue("@writer", "%" + textBox2.Text + "%");
+            command.Parameters.AddWithValue("@publish", "%" + textBox3.Text + "%");
             command.Parameters.AddWithValue("@category", comboBox1.SelectedIndex);
             command.Parameters.AddWithValue("@status", status);
             DBConfig.sqlite_datareader = command.ExecuteReader();
@@ -196,15 +197,7 @@ namespace CsharpReport
         {
             if (dataGridView1.Columns[e.ColumnIndex] is DataGridViewButtonColumn && e.RowIndex > -1)
             {
-
-                //獲取當前被點擊的單元格
-                DataGridViewButtonCell vCell = (DataGridViewButtonCell)dataGridView1.CurrentCell;
-
-                //現在第幾欄
-                //MessageBox.Show(e.ColumnIndex.ToString());
-                //目前第幾筆
-                //MessageBox.Show(e.RowIndex.ToString());
-                //MessageBox.Show(dataGridView1.Columns[e.ColumnIndex].ToString());
+                //判斷點選的是編輯還是刪除
                 if (e.ColumnIndex == 7 && dataGridView1.Rows[e.RowIndex].Cells["Column1"].Value != null)
                 {
                     //取得書籍編號
@@ -222,7 +215,7 @@ namespace CsharpReport
                 {
                     int bookId = (int)dataGridView1.Rows[e.RowIndex].Cells["Column1"].Value;
                     string bookName = (string)dataGridView1.Rows[e.RowIndex].Cells["Column2"].Value;
-                    if (dataGridView1.Rows[e.RowIndex].Cells["Column6"].Value.ToString() == "可借出") 
+                    if (dataGridView1.Rows[e.RowIndex].Cells["Column6"].Value.ToString() == "可借出")
                     {
                         var confirmResult = MessageBox.Show("確定刪除《" + bookName + "》？",
                                      "刪除書籍！！",
@@ -261,10 +254,6 @@ namespace CsharpReport
                 {
                     MessageBox.Show("查無此書");
                 }
-
-                //參考
-                //https://www.twblogs.net/a/5e5578e8bd9eee2117c61e72
-                //https://learn.microsoft.com/zh-tw/dotnet/api/system.windows.forms.datagridviewbuttoncolumn?view=windowsdesktop-7.0
             }
         }
 
@@ -417,7 +406,6 @@ namespace CsharpReport
                 xls = new Microsoft.Office.Interop.Excel.Application();
                 // Excel WorkBook
                 Microsoft.Office.Interop.Excel.Workbook book = xls.Workbooks.Add();
-                //Excel.Worksheet Sheet = (Excel.Worksheet)book.Worksheets[1];
                 Microsoft.Office.Interop.Excel.Worksheet Sheet = xls.ActiveSheet;
 
                 // 把資料塞進 Excel 內
@@ -463,13 +451,6 @@ namespace CsharpReport
         void PrintPDF()
         {
             // Set the output dir and file name
-            // string directory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
-            string src = "./test.pdf";
-            string dst = @"./new_test.pdf";
-
-            //manipulatePdf(src, dst);
-
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop); ;
             saveFileDialog.FileName = "書籍資料";
@@ -480,8 +461,9 @@ namespace CsharpReport
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
                 //Get the path of specified file
-                dst = saveFileDialog.FileName;
-                manipulatePdf(src, dst);
+                string src = saveFileDialog.FileName;
+                string dst = src + "_tmp";
+                ManipulatePdf(src, dst);
             }
 
         }
@@ -491,11 +473,8 @@ namespace CsharpReport
         /// </summary>
         /// <param name="src"></param>
         /// <param name="dst"></param>
-        void manipulatePdf(String src, String dst)
+        void ManipulatePdf(String src, String dst)
         {
-            src = dst;
-            dst = dst + "_tmp";
-
             // 1. create pdf
             PdfWriter writer = new PdfWriter(dst);
             PdfDocument pdf = new PdfDocument(writer);
@@ -503,8 +482,7 @@ namespace CsharpReport
 
             // 標楷體
             PdfFont font_tr = PdfFontFactory.CreateFont(@"c:/Windows/fonts/kaiu.ttf", PdfEncodings.IDENTITY_H);
-            // 正黑體
-            //PdfFont font_msjh = PdfFontFactory.CreateFont(@"./msjh.ttf", PdfEncodings.IDENTITY_H);
+            // 正黑體 PdfFont font_msjh = PdfFontFactory.CreateFont(@"./msjh.ttf", PdfEncodings.IDENTITY_H);
             document.SetFont(font_tr); // 預設中文字型
 
             // 2. 加文字
@@ -522,16 +500,13 @@ namespace CsharpReport
 
             float[] colWidths = { 1, 6, 3, 2, 2, 2, 2 };
             // Creating a table       
-            Table table_data = new Table(UnitValue.CreatePercentArray(colWidths));
-
-            //讀取grid資料
-            String Gridparagraph = "";
+            Table table_bookData = new Table(UnitValue.CreatePercentArray(colWidths));
             int tableNum = dataGridView1.ColumnCount - 2;
 
             //表格標題列
             for (int k = 0; k < tableNum; k++)
             {
-                table_data.AddHeaderCell(new Paragraph(dataGridView1.Columns[k].HeaderText));
+                table_bookData.AddHeaderCell(new Paragraph(dataGridView1.Columns[k].HeaderText));
             }
 
             //表格內容
@@ -539,24 +514,24 @@ namespace CsharpReport
             {
                 for (int j = 0; j < tableNum; j++)
                 {
-                    Gridparagraph = Convert.ToString(dataGridView1.Rows[i].Cells[j].Value);
+                    string Gridparagraph = Convert.ToString(dataGridView1.Rows[i].Cells[j].Value);
                     // Adding cells to the table       
                     Cell cell = new Cell().Add(new Paragraph(Gridparagraph));
                     cell.SetBorder(new SolidBorder(ColorConstants.WHITE, 0));
                     cell.SetBorderBottom(new SolidBorder(ColorConstants.GRAY, 0));
-                    table_data.AddCell(cell);
+                    table_bookData.AddCell(cell);
                 }
             }
 
-            // Adding Table to document        
-            document.Add(table_data);
-            //table_data.Complete();
+            // Adding Table to document
+            document.Add(table_bookData);
+            //table_data.Complete(); 放這行資料table會重複輸出一次
 
             // move to next page
             // Creating an Area Break          
             AreaBreak a_ch_1 = new AreaBreak();
 
-            // Adding area break to the PDF       
+            // Adding area break to the PDF
             document.Add(a_ch_1);
 
             /////////////////////////////////
@@ -609,7 +584,7 @@ namespace CsharpReport
                .SetTextAlignment(TextAlignment.CENTER)
                .SetFontSize(24)
                .SetFont(font_tr);
-            document.Add(header_2);
+            document.Add(header_3);
 
             Table table_ch_2 = new Table(2, true);
             table_ch_2.SetFont(font_tr);
@@ -623,7 +598,7 @@ namespace CsharpReport
             table_ch_2.AddCell(new Paragraph(qrcodeData));
 
             // 出貨統計資料 QR Code
-            System.Drawing.Bitmap bitmap_2 = get_qrcode(qrcodeData, pictureBox2.Width, pictureBox2.Height);
+            System.Drawing.Bitmap bitmap_2 = GetQrcode(qrcodeData, pictureBox2.Width, pictureBox2.Height);
             ImageData imageData_2 = ImageDataFactory.Create(BmpToBytes(bitmap_2));
             iText.Layout.Element.Image image_ch2 = new iText.Layout.Element.Image(imageData_2);
             image_ch2.SetAutoScale(true);
@@ -641,7 +616,7 @@ namespace CsharpReport
             Document document2 = new Document(pdfDoc2);
 
             // 5. add Page numbers
-            draw_header(pdfDoc2, document2);
+            DrawHeader(pdfDoc2, document2);
             document2.Close();
             File.Delete(dst);
             MessageBox.Show("成功匯出pdf");
@@ -652,7 +627,7 @@ namespace CsharpReport
         /// </summary>
         /// <param name="pdfDoc"></param>
         /// <param name="document"></param>
-        void draw_header(PdfDocument pdfDoc, Document document)
+        void DrawHeader(PdfDocument pdfDoc, Document document)
         {
             PdfFont font = PdfFontFactory.CreateFont(@"c:/Windows/fonts/kaiu.ttf", PdfEncodings.IDENTITY_H);
             iText.Kernel.Geom.Rectangle pageSize;
@@ -667,7 +642,7 @@ namespace CsharpReport
                 //Draw header text
                 canvas.BeginText()
                     .SetFontAndSize(font, 15)
-                    .MoveText(pageSize.GetWidth() / 2 -30, pageSize.GetHeight() - 20)
+                    .MoveText(pageSize.GetWidth() / 2 - 30, pageSize.GetHeight() - 20)
                     .ShowText("圖書系統")
                     .EndText();
 
@@ -707,7 +682,7 @@ namespace CsharpReport
             return b;
         }
 
-        public Bitmap get_qrcode(string log, int i_width, int i_height)
+        public Bitmap GetQrcode(string log, int i_width, int i_height)
         {
             System.Drawing.Bitmap bitmap = null;
             //let string to qr-code
@@ -734,15 +709,13 @@ namespace CsharpReport
             };
             //Create Qr-code , use input string
             bitmap = writer.Write(strQrCodeContent);
-            /*
-            string strDir;
-            strDir = Directory.GetCurrentDirectory();
-            strDir += "\\temp.jpg";
-            bitmap.Save(strDir, System.Drawing.Imaging.ImageFormat.Jpeg);
-            */
             return bitmap;
         }
 
+        /// <summary>
+        /// 取得pdfQRcode資料
+        /// </summary>
+        /// <returns></returns>
         private string GetQrcodeData()
         {
             string strQrcodeData = "";
@@ -760,16 +733,21 @@ namespace CsharpReport
             {
                 while (DBConfig.sqlite_datareader.Read()) //read every data
                 {
-                    strQrcodeData = strQrcodeData + Convert.ToString(DBConfig.sqlite_datareader["category_name"])+"："+Convert.ToInt32(DBConfig.sqlite_datareader["count"]) + "\n";
+                    strQrcodeData = strQrcodeData + Convert.ToString(DBConfig.sqlite_datareader["category_name"]) + "：" + Convert.ToInt32(DBConfig.sqlite_datareader["count"]) + "\n";
                 }
                 DBConfig.sqlite_datareader.Close();
             }
             return strQrcodeData;
         }
 
+        /// <summary>
+        /// 產生QRcode功能
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button12_Click(object sender, EventArgs e)
         {
-            if(richTextBox1.Text == "")
+            if (richTextBox1.Text == "")
             {
                 MessageBox.Show("請輸入欲轉換文字");
             }
